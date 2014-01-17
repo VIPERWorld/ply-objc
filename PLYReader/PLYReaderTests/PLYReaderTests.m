@@ -8,6 +8,7 @@
 
 #import <XCTest/XCTest.h>
 #import "PLYReader.h"
+#include "asl.h"
 
 @interface PLYReaderTests : XCTestCase
 
@@ -19,6 +20,8 @@
 {
     [super setUp];
     // Put setup code here. This method is called before the invocation of each test method in the class.
+    asl_add_log_file(NULL, STDERR_FILENO);
+    
 }
 
 - (void)tearDown
