@@ -17,6 +17,7 @@ NSString *const kPLYFormatKeyword = @"format";
 NSString *const kPLYPropertyKeyword = @"property";
 NSString *const kPLYEndHeaderKeyword = @"end_header";
 
+
 typedef enum PLYEnumFormatType {
     PLYFormatTypeASCII = 0,
     PLYFormatTypeBinaryBigEndian = 1,
@@ -39,6 +40,8 @@ typedef enum PLYEnumFormatType {
     NSMutableArray *_elementProperties;
     
     PLYFormatType _fileFormatType;
+    
+    NSDictionary *_plyDataSizes;
 }
 
 
@@ -63,6 +66,17 @@ typedef enum PLYEnumFormatType {
         _elementProperties = nil;
         
         _fileFormatType = PLYFormatTypeASCII;
+
+        _plyDataSizes = @{ @"char": @1,
+                           @"uchar": @1,
+                           @"short": @2,
+                           @"ushort": @2,
+                           @"int": @4,
+                           @"uint": @4,
+                           @"float": @4,
+                           @"double": @8
+                           };
+
     }
     
     return self;
@@ -189,8 +203,19 @@ const NSUInteger kPLYFieldName = 0;
             
             }
             
-            // end_header keyword causes header processing to stop
+            // end_header keyword causes header processing to stop, but save
+            // whatever element was in process
             else if( [fieldName isEqualToString:kPLYEndHeaderKeyword] ) {
+                
+                // preserve the previous element data, if there was one.
+                if(_currentElement) {
+                    [_currentElement setObject:[NSArray arrayWithArray:_currentPropertyArray]
+                                        forKey:kPLYReaderElementPropertyKey];
+                    [_elementProperties addObject:[NSDictionary dictionaryWithDictionary:_currentElement]];
+                    _currentElement = nil;
+                    _currentPropertyArray = nil;
+                }
+                
                 break;
             }
             
@@ -310,6 +335,7 @@ const NSUInteger kPLYElementCountIndex = 2;
 }
 
 const NSUInteger kPLYMinimumPropertyCount = 3;
+const NSUInteger kPLYMinimumPropertyListCount = 5;
 const NSUInteger kPLYPropertyTypeIndex = 1;
 const NSUInteger kPLYPropertyListCountTypeIndex = 2;
 const NSUInteger kPLYPropertyListDataTypeIndex = 3;
@@ -334,10 +360,35 @@ NSString *const kPLYPropertyListKeyword = @"list";
     NSString *propertyType = [parameters objectAtIndex:kPLYPropertyTypeIndex];
 
     if( [propertyType isEqualToString:kPLYPropertyListKeyword] ) {
-        NSLog(@"PLYReader: Internal error, %@ keyword found but no handler for %@ element",kPLYPropertyKeyword,kPLYPropertyListKeyword);
+        
+        if( [parameters count] < kPLYMinimumPropertyListCount ) {
+            NSLog(@"PLYReader: Internal error, %@ %@ keyword found with insufficient (%lu) parameters.",kPLYPropertyKeyword,kPLYPropertyListKeyword,
+                  [parameters count]);
+        } else {
+            
+            NSString *propertyName = [parameters objectAtIndex:kPLYPropertyListNameIndex];
+            NSString *propertyCountType = [parameters objectAtIndex:kPLYPropertyListCountTypeIndex];
+            NSString *propertyDataType = [parameters objectAtIndex:kPLYPropertyListDataTypeIndex];
+            
+            NSNumber *propertyCountSize = [_plyDataSizes objectForKey:propertyCountType];
+            NSNumber *propertyDataSize = [_plyDataSizes objectForKey:propertyDataType];
+            
+            [_currentPropertyArray addObject:[NSDictionary dictionaryWithObjectsAndKeys:
+                                              propertyName, kPLYReaderPropertyNameKey,
+                                              propertyCountSize, kPLYReaderPropertyCountSizeKey,
+                                              propertyDataSize, kPLYReaderPropertyDataSizeKey,
+                                              nil]];
+            success = YES;
+        }
     } else {
         NSString *propertyName = [parameters objectAtIndex:kPLYPropertyNameIndex];
-        [_currentPropertyArray addObject:[NSDictionary dictionaryWithObject:propertyType forKey:propertyName]];
+        
+        NSNumber *propertySize = [_plyDataSizes objectForKey:propertyType];
+        
+        [_currentPropertyArray addObject:[NSDictionary dictionaryWithObjectsAndKeys:
+                                          propertyName, kPLYReaderPropertyNameKey,
+                                          propertySize, kPLYReaderPropertyDataSizeKey,
+                                          nil]];
         success = YES;
     }
 

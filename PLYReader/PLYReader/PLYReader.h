@@ -34,6 +34,10 @@ NSString *const kPLYReaderElementPropertyKey = @"element.properties";
 NSString *const kPLYReaderElementCountKey = @"element.count";
 NSString *const kPLYReaderElementNameKey = @"element.name";
 
+NSString *const kPLYReaderPropertyCountSizeKey = @"property.countsize";
+NSString *const kPLYReaderPropertyDataSizeKey = @"property.datasize";
+NSString *const kPLYReaderPropertyNameKey = @"property.name";
+
 @interface PLYReader : NSObject
 
 - (id) initWithURL:(NSURL *)url;
