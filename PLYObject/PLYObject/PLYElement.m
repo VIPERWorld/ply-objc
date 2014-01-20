@@ -1,0 +1,77 @@
+//
+//  PLYElement.m
+//  PLYObject
+//
+//  Created by David Brown on 1/19/14.
+//  Copyright (c) 2014 David T. Brown. All rights reserved.
+//
+
+#import "PLYElement.h"
+
+@implementation PLYElement
+{
+    NSMutableArray *_properties;
+    NSData *_data;
+}
+
+- (void)addProperty:(PLYProperty *)newProperty
+{
+    
+    // add a non-nil object to the existing mutable array, or create
+    // it if it does not yet exist
+    if(newProperty) {
+        if(_properties == nil) {
+            _properties = [NSMutableArray arrayWithObject:newProperty];
+        } else {
+            [_properties addObject:newProperty];
+        }
+    }
+    
+}
+
+- (NSArray *)properties
+{
+    return [NSArray arrayWithArray:_properties];
+}
+
+const NSUInteger kPLYBufferSize = 512;
+
+- (BOOL)readFromStrings:(NSArray *)strings startPosition:(NSUInteger)start
+{
+    BOOL success = YES;
+    
+    NSScanner *lineScanner = nil;
+    
+    NSIndexSet *elementSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(start, _count)];
+    __block NSMutableData *elementData = [[NSMutableData alloc] init];
+    
+    [strings enumerateObjectsAtIndexes:elementSet
+                               options:0
+                            usingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+                                
+                                NSScanner *lineScanner = [NSScanner scannerWithString:(NSString *)obj];
+                                uint8_t *lineBuffer = calloc(kPLYBufferSize, sizeof(uint8_t));
+                                
+                                PLYProperty *nextProperty;
+                                NSUInteger bytes, totalBytes;
+                                
+                                uint8_t *buffer = lineBuffer;
+                                totalBytes = 0;
+                                
+                                for( nextProperty in _properties ) {
+                                    bytes = [nextProperty scanPropertyIntoBuffer:(uint8_t *)buffer
+                                                                    usingScanner:lineScanner];
+                                    buffer += bytes;
+                                    totalBytes += bytes;
+                                }
+                                
+                                [elementData appendBytes:lineBuffer length:totalBytes];
+    
+                            }];
+    
+    _data = [NSData dataWithData:elementData];
+    
+    return success;
+}
+
+@end
