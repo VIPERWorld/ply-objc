@@ -7,6 +7,8 @@
 //
 
 #import <XCTest/XCTest.h>
+#import "PLYObject.h"
+#import "PLYElement.h"
 
 @interface PLYObjectTests : XCTestCase
 
@@ -26,9 +28,30 @@
     [super tearDown];
 }
 
-- (void)testExample
+- (void)testPLYObject
 {
-    XCTFail(@"No implementation for \"%s\"", __PRETTY_FUNCTION__);
+    
+    NSURL *plyUrl = [[NSBundle bundleForClass:[PLYObjectTests class]] URLForResource:@"drill_shaft_zip" withExtension:@"ply"];
+    PLYObject *drillShaftObject = [[PLYObject alloc] init];
+    
+    XCTAssertNotNil(drillShaftObject, @"PLYObject did not allocate properly.");
+    
+    [drillShaftObject readFromURL:plyUrl error:NULL];
+    
+    XCTAssertEqual([[drillShaftObject comments] count], (NSUInteger)0, @"PLYObject read wrong number of comments.");
+    
+    XCTAssertEqual([[[drillShaftObject elements] allKeys] count], (NSUInteger)2, @"PLYObject read wrong number of elements.");
+    
+    // TODO: need more detailed checks of these elements
+    
+    PLYElement *nextElement = [[drillShaftObject elements] objectForKey:@"vertex"];
+    
+    XCTAssertNotNil(nextElement, @"PLYObject provided unexpected nil for PLYElement.");
+    XCTAssertEqual([nextElement count], 881, @"Vertex Element did not contain expected element count");
+    XCTAssertEqual([[nextElement properties] count], 4, @"vertex element did not contain expected property count");
+    
+    nextElement = [[drillShaftObject elements] objectForKey:@"vertex_indices"];
+    
+    
 }
-
 @end

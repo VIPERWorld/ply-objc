@@ -18,6 +18,7 @@
 		5514BAAC188C45270018CBFE /* PLYElement.m in Sources */ = {isa = PBXBuildFile; fileRef = 5514BAAA188C45270018CBFE /* PLYElement.m */; };
 		5514BAAF188C47A30018CBFE /* PLYProperty.h in Headers */ = {isa = PBXBuildFile; fileRef = 5514BAAD188C47A30018CBFE /* PLYProperty.h */; };
 		5514BAB0188C47A30018CBFE /* PLYProperty.m in Sources */ = {isa = PBXBuildFile; fileRef = 5514BAAE188C47A30018CBFE /* PLYProperty.m */; };
+		5514BAB2188E47850018CBFE /* drill_shaft_zip.ply in Resources */ = {isa = PBXBuildFile; fileRef = 5514BAB1188E232D0018CBFE /* drill_shaft_zip.ply */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -48,6 +49,7 @@
 		5514BAAA188C45270018CBFE /* PLYElement.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PLYElement.m; sourceTree = "<group>"; };
 		5514BAAD188C47A30018CBFE /* PLYProperty.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PLYProperty.h; sourceTree = "<group>"; };
 		5514BAAE188C47A30018CBFE /* PLYProperty.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PLYProperty.m; sourceTree = "<group>"; };
+		5514BAB1188E232D0018CBFE /* drill_shaft_zip.ply */ = {isa = PBXFileReference; lastKnownFileType = text; name = drill_shaft_zip.ply; path = PLYObjectTests/drill_shaft_zip.ply; sourceTree = SOURCE_ROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -145,6 +147,7 @@
 		5514BA96188B10580018CBFE /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				5514BAB1188E232D0018CBFE /* drill_shaft_zip.ply */,
 				5514BA97188B10580018CBFE /* PLYObjectTests-Info.plist */,
 				5514BA98188B10580018CBFE /* InfoPlist.strings */,
 			);
@@ -238,6 +241,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				5514BAB2188E47850018CBFE /* drill_shaft_zip.ply in Resources */,
 				5514BA9A188B10580018CBFE /* InfoPlist.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -434,6 +438,7 @@
 				5514BAA1188B10580018CBFE /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		5514BAA2188B10580018CBFE /* Build configuration list for PBXNativeTarget "PLYObjectTests" */ = {
 			isa = XCConfigurationList;
@@ -442,6 +447,7 @@
 				5514BAA4188B10580018CBFE /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

@@ -39,8 +39,11 @@ const NSUInteger kPLYKeywordIndex = 0;
 
 - (BOOL)readFromURL:(NSURL *)url error:(NSError **)error
 {
-    NSError *readError = *error;
     BOOL success = YES;
+    
+    NSError *readError = nil;
+    if( error != NULL )
+        readError = *error;
     
     _elementCount = 1;
     _propertyCount = 1;
@@ -49,7 +52,7 @@ const NSUInteger kPLYKeywordIndex = 0;
 
         // load the strings
         NSString *fileString = [NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:&readError];
-        _fileStringArray = [fileString componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        _fileStringArray = [fileString componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
         
         // confirm ply-end_header bracketing, store element start position
         NSIndexSet *plySet = [_fileStringArray indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
@@ -88,7 +91,7 @@ const NSUInteger kPLYKeywordIndex = 0;
                                       {
                                           NSString *testString = (NSString *)obj;
                                           NSRange resultRangeElement = [testString rangeOfString:kPLYElementKeyword];
-                                          NSRange resultRangeProperty = [testString rangeOfString:kPLYElementKeyword];
+                                          NSRange resultRangeProperty = [testString rangeOfString:kPLYPropertyKeyword];
                                           return (resultRangeElement.location == 0) || (resultRangeProperty.location == 0);
                                       }];
 
@@ -136,6 +139,7 @@ const NSUInteger kPLYKeywordIndex = 0;
         PLYElement *nextElement = nil;
         NSUInteger readLines = 0;
         
+        // BUG: does not enumerate elements in order, necessarily, which is needed.
         for( nextElement in _elements ) {
             
             readLines = [nextElement readFromStrings:_fileStringArray startPosition:_elementDataPosition];
@@ -156,7 +160,13 @@ const NSUInteger kPLYElementCountIndex = 2;
 
 - (PLYElement *)processElementFieldArray:(NSArray *)fieldArray
 {
-    return nil;
+    NSString *countString = [fieldArray objectAtIndex:kPLYElementCountIndex];
+    
+    PLYElement *newElement = [[PLYElement alloc] init];
+    newElement.name = [fieldArray objectAtIndex:kPLYElementNameIndex];
+    newElement.count = (NSUInteger)[countString integerValue];
+    
+    return newElement;
 }
 
 const NSUInteger kPLYMinimumPropertyCount = 3;
@@ -168,9 +178,25 @@ const NSUInteger kPLYPropertyListDataTypeIndex = 3;
 const NSUInteger kPLYPropertyListNameIndex = 4;
 const NSUInteger kPLYPropertyNameIndex = 2;
 
+NSString *const kPLYPropertyTypeList = @"list";
+
 - (PLYProperty *)processPropertyFieldArray:(NSArray *)fieldArray
 {
-    return nil;
+    PLYProperty *newProperty = [[PLYProperty alloc] init];
+    
+    NSString *propertyType = [fieldArray objectAtIndex:kPLYPropertyTypeIndex];
+    newProperty.type = propertyType;
+    
+    if( [propertyType isEqualToString:kPLYPropertyTypeList] ) {
+        newProperty.name = [fieldArray objectAtIndex:kPLYPropertyListNameIndex];
+        newProperty.dataType = [fieldArray objectAtIndex:kPLYPropertyListDataTypeIndex];
+        newProperty.countType = [fieldArray objectAtIndex:kPLYPropertyListCountTypeIndex];
+    } else {
+        newProperty.name = [fieldArray objectAtIndex:kPLYPropertyNameIndex];
+        newProperty.dataType = propertyType;
+    }
+    
+    return newProperty;
 }
 
 
