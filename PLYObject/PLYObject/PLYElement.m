@@ -44,12 +44,13 @@ const NSUInteger kPLYBufferSize = 512;
     NSIndexSet *elementSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(start, _count)];
     __block NSMutableData *elementData = [[NSMutableData alloc] init];
     
+    uint8_t *lineBuffer = calloc(kPLYBufferSize, sizeof(uint8_t));
+
     [strings enumerateObjectsAtIndexes:elementSet
                                options:0
                             usingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
                                 
                                 NSScanner *lineScanner = [NSScanner scannerWithString:(NSString *)obj];
-                                uint8_t *lineBuffer = calloc(kPLYBufferSize, sizeof(uint8_t));
                                 
                                 PLYProperty *nextProperty;
                                 NSUInteger bytes, totalBytes;
@@ -71,6 +72,8 @@ const NSUInteger kPLYBufferSize = 512;
                             }];
     
     _data = [NSData dataWithData:elementData];
+    
+    free(lineBuffer);
     
     return readLines;
 }

@@ -47,11 +47,14 @@
     PLYElement *nextElement = [[drillShaftObject elements] objectForKey:@"vertex"];
     
     XCTAssertNotNil(nextElement, @"PLYObject provided unexpected nil for PLYElement.");
-    XCTAssertEqual([nextElement count], 881, @"Vertex Element did not contain expected element count");
-    XCTAssertEqual([[nextElement properties] count], 4, @"vertex element did not contain expected property count");
+    XCTAssertEqual([nextElement count], (NSUInteger)881, @"vertex element did not contain expected element count");
+    XCTAssertEqual([[nextElement properties] count], (NSUInteger)4, @"vertex element did not contain expected property count");
     
-    nextElement = [[drillShaftObject elements] objectForKey:@"vertex_indices"];
+    nextElement = [[drillShaftObject elements] objectForKey:@"face"];
     
-    
+    XCTAssertNotNil(nextElement, @"PLYObject provided unexpected nil for PLYElement.");
+    XCTAssertEqual([nextElement count], (NSUInteger)1288, @"face element did not contain expected element count");
+    XCTAssertEqual([[nextElement properties] count], (NSUInteger)1, @"face element did not contain expected property count");
+
 }
 @end

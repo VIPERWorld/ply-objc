@@ -32,8 +32,10 @@ const NSUInteger kPLYKeywordIndex = 0;
      */
     NSUInteger _elementDataPosition;
     
-    NSUInteger _elementCount;
-    NSUInteger _propertyCount;
+    /**
+     ordered collection of element keys for enumeration during element data import
+     */
+    NSMutableArray *_elementNames;
     
 }
 
@@ -44,9 +46,6 @@ const NSUInteger kPLYKeywordIndex = 0;
     NSError *readError = nil;
     if( error != NULL )
         readError = *error;
-    
-    _elementCount = 1;
-    _propertyCount = 1;
     
     if( url ) {
 
@@ -69,6 +68,8 @@ const NSUInteger kPLYKeywordIndex = 0;
             // it's not a ply header if it has more or less than 1 ply/header pair
             success = NO;
         } else {
+            
+            _elementNames = [[NSMutableArray alloc] init];
             
             NSRange headerRange = NSMakeRange([plySet firstIndex],[endHeaderSet firstIndex]);
             
@@ -111,6 +112,7 @@ const NSUInteger kPLYKeywordIndex = 0;
 
                     if( newElement ) {
                         [elementWork setObject:newElement forKey:[newElement name]];
+                        [_elementNames addObject:[newElement name]];
                         newElement = nil;
                     }
                     
@@ -127,26 +129,29 @@ const NSUInteger kPLYKeywordIndex = 0;
             
             if( newElement ) {
                 [elementWork setObject:newElement forKey:[newElement name]];
+                [_elementNames addObject:[newElement name]];
                 newElement = nil;
             }
             
             _elements = [NSDictionary dictionaryWithDictionary:elementWork];
+            elementWork = nil;
             
+            // now we have the header data ready. let's read some data, use the ordered
+            // list of keys we generated when we read the header above, since the data
+            // section of the .ply file follows the same ordering as used in the header
+            
+            PLYElement *nextElement = nil;
+            NSString *nextElementName = nil;
+            NSUInteger readLines = 0;
+            
+            for( nextElementName in _elementNames ) {
+                
+                nextElement = [_elements objectForKey:nextElementName];
+                readLines = [nextElement readFromStrings:_fileStringArray startPosition:_elementDataPosition];
+                _elementDataPosition += readLines;
+                
+            }
         }
-        
-        // now we have the header data ready. let's read some data
-        
-        PLYElement *nextElement = nil;
-        NSUInteger readLines = 0;
-        
-        // BUG: does not enumerate elements in order, necessarily, which is needed.
-        for( nextElement in _elements ) {
-            
-            readLines = [nextElement readFromStrings:_fileStringArray startPosition:_elementDataPosition];
-            _elementDataPosition += readLines;
-            
-        }
-        
         
     }
     

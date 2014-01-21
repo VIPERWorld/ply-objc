@@ -22,15 +22,16 @@ NSString *const kPLYDataTypeList = @"list";
 
 - (NSUInteger)scanPropertyIntoBuffer:(uint8_t *)buffer usingScanner:(NSScanner *)lineScanner {
     
-    NSUInteger readBytes = 0;
+    NSUInteger totalReadBytes = 0;
     
     if( buffer == NULL || lineScanner == nil ) {
-        readBytes = 0;
+        totalReadBytes = 0;
     } else {
         
         if( [_type isEqualToString:kPLYDataTypeList] ) {
             // list properties contain a count followed by the data values
-            NSInteger idx, listCount;
+            NSInteger listCount;
+            NSUInteger idx, readBytes;
             double scanDouble;
             uint8_t *bp = buffer;
             
@@ -43,8 +44,9 @@ NSString *const kPLYDataTypeList = @"list";
             // to the appropriate data type and store it in the buffer
             for( idx=0; idx < listCount; idx++ ) {
                 [lineScanner scanDouble:&scanDouble];
-                readBytes += [self convertFromDouble:scanDouble toType:_dataType inBuffer:bp];
+                readBytes = [self convertFromDouble:scanDouble toType:_dataType inBuffer:bp];
                 bp += readBytes;
+                totalReadBytes += readBytes;
             }
             
         } else {
@@ -55,12 +57,12 @@ NSString *const kPLYDataTypeList = @"list";
             // add it to the memory buffer.
             [lineScanner scanDouble:&scanDouble];
 
-            readBytes = [self convertFromDouble:scanDouble toType:_type inBuffer:buffer];
+            totalReadBytes = [self convertFromDouble:scanDouble toType:_type inBuffer:buffer];
             
         }
     }
     
-    return readBytes;
+    return totalReadBytes;
 }
 
 /**
