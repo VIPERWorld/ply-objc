@@ -134,7 +134,12 @@ const NSUInteger kPLYKeywordIndex = 0;
         // now we have the header data ready. let's read some data
         
         PLYElement *nextElement = nil;
+        NSUInteger readLines = 0;
+        
         for( nextElement in _elements ) {
+            
+            readLines = [nextElement readFromStrings:_fileStringArray startPosition:_elementDataPosition];
+            _elementDataPosition += readLines;
             
         }
         

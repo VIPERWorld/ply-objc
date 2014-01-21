@@ -7,6 +7,7 @@
 //
 
 #import "PLYElement.h"
+#import "PLYProperty.h"
 
 @implementation PLYElement
 {
@@ -36,11 +37,9 @@
 
 const NSUInteger kPLYBufferSize = 512;
 
-- (BOOL)readFromStrings:(NSArray *)strings startPosition:(NSUInteger)start
+- (NSUInteger)readFromStrings:(NSArray *)strings startPosition:(NSUInteger)start
 {
-    BOOL success = YES;
-    
-    NSScanner *lineScanner = nil;
+    __block NSUInteger readLines = 0;
     
     NSIndexSet *elementSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(start, _count)];
     __block NSMutableData *elementData = [[NSMutableData alloc] init];
@@ -66,12 +65,14 @@ const NSUInteger kPLYBufferSize = 512;
                                 }
                                 
                                 [elementData appendBytes:lineBuffer length:totalBytes];
+                                
+                                readLines += (totalBytes > 0) ? 1 : 0; // gratuitous ternary action
     
                             }];
     
     _data = [NSData dataWithData:elementData];
     
-    return success;
+    return readLines;
 }
 
 @end

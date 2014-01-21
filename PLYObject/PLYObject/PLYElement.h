@@ -40,8 +40,8 @@
  Read an element set from a string array.
  @param strings the array of string data to read from
  @param start the starting string position
- @return successful reading
+ @return number of lines read for this element
  */
-- (BOOL)readFromStrings:(NSArray *)strings startPosition:(NSUInteger)start;
+- (NSUInteger)readFromStrings:(NSArray *)strings startPosition:(NSUInteger)start;
 
 @end
