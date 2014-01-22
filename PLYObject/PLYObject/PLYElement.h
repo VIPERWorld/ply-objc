@@ -19,21 +19,14 @@
  The name of the element
  */
 @property (readwrite) NSString *name;
-
 /**
  The number of these elements in the PLY file
  */
 @property (readwrite) NSUInteger count;
-
 /**
  An array of properties for this element
  */
 @property (readonly) NSArray *properties;
-
-/**
- The binary data for this element
- */
-@property (readonly) NSData *data;
 
 /**
  Add a property to the element
@@ -41,6 +34,7 @@
  @return nothing
  */
 - (void)addProperty:(PLYProperty *)newProperty;
+
 
 /**
  Read an element set from a string array.
