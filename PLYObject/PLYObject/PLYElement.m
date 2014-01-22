@@ -14,8 +14,77 @@
     NSMutableArray *_properties;
 }
 
-- (void)addProperty:(PLYProperty *)newProperty
+- (id) init
 {
+    return [self initWithElementString:nil];
+}
+
+- (id) initWithElementString:(NSString *)string
+{
+    self = [super init];
+    
+    if(self) {
+        
+        [self setElementString:string];
+    }
+    
+    return self;
+}
+
+const NSUInteger kPLYMinimumElementCount = 3;
+
+const NSUInteger kPLYElementFieldIndex = 0;
+const NSUInteger kPLYElementNameIndex = 1;
+const NSUInteger kPLYElementCountIndex = 2;
+
+NSString *const kPLYElementName = @"element";
+
+- (void)setElementString:(NSString *)elementString
+{
+    _elementString = elementString;
+    
+    _count = 0;
+    _name = nil;
+    _properties = nil;
+    _data = nil;
+    
+    if(_elementString) {
+        
+        // separate the element string into whitespace delimited fields
+        NSArray *elementFields = [_elementString componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        
+        // check a set of constraints on the fields
+        if( elementFields &&
+            [[elementFields objectAtIndex:kPLYElementFieldIndex] isEqualToString:kPLYElementName] &&
+           ([elementFields count] >= kPLYMinimumElementCount) ) {
+            
+            _name = [elementFields objectAtIndex:kPLYElementNameIndex];
+            NSNumber *elementCount = [elementFields objectAtIndex:kPLYElementCountIndex];
+            if(elementCount)
+                _count = [elementCount unsignedIntegerValue];
+        } else {
+            // issue!!
+        }
+        
+    } else {
+        // issue!
+    }
+    
+}
+
+- (NSString *)elementString
+{
+    return _elementString;
+}
+
+- (NSArray *)properties
+{
+    return [NSArray arrayWithArray:_properties];
+}
+
+- (void)addPropertyWithString:(NSString *)propertyString
+{
+    PLYProperty *newProperty = [[PLYProperty alloc] initWithPropertyString:propertyString];
     
     // add a non-nil object to the existing mutable array, or create
     // it if it does not yet exist
@@ -27,11 +96,6 @@
         }
     }
     
-}
-
-- (NSArray *)properties
-{
-    return [NSArray arrayWithArray:_properties];
 }
 
 const NSUInteger kPLYBufferSize = 512;
