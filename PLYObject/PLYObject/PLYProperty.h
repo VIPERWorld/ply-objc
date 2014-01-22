@@ -9,11 +9,53 @@
 #import <Foundation/Foundation.h>
 
 @interface PLYProperty : NSObject
+{
+    NSString *_propertyString;
+}
 
-@property (readwrite) NSString *name;
-@property (readwrite) NSString *type;
-@property (readwrite) NSString *countType;
-@property (readwrite) NSString *dataType;
+/**
+ The string value of the property name
+ */
+@property (readonly) NSString *name;
+
+/**
+ The property string conforming to the PLY file specification
+ */
+@property (readwrite) NSString *propertyString;
+
+/**
+ Flag indicating the property is a list
+ */
+@property (readonly, getter = isList) BOOL list;
+
+/**
+ The length of each data value in bytes
+ */
+@property (readonly) NSUInteger dataLength;
+
+/**
+ The length of each count value in bytes
+ */
+@property (readonly) NSUInteger countLength;
+
+/**
+ The OpenGL data type of each data value
+ */
+@property (readonly) GLenum dataGLType;
+
+/**
+ The OpenGL data type of each count value
+ */
+@property (readonly) GLenum countGLType;
+
+
+
+/**
+ Configures the property
+ @param string the property declaration string from a PLY file
+ @return an object initialized with the supplied property string
+ */
+- (id) initWithPropertyString:(NSString *)string;
 
 /**
  Scans the property using the provided scanner into a provided data buffer
@@ -22,25 +64,5 @@
  @return the number of bytes read by the scan operation
  */
 - (NSUInteger)scanPropertyIntoBuffer:(uint8_t *)buffer usingScanner:(NSScanner *)lineScanner;
-
-/**
- Provides the data sizes that are configured for the property
- @return the array of data sizes in the order they appeared in the header file
- */
-- (NSArray *)dataSizes;
-
-/**
- Provides the GL data types that are configured for the property
- @return the array of GL data types in the order they appeared in the header file
- */
-- (NSArray *)GLtypes;
-
-/**
- Provides the property names that are configured for the property, with list
- properties reporting the property name plus a sequential index number starting
- from 1.
- @return the array of property names
- */
-- (NSArray *)propertyNames;
 
 @end
