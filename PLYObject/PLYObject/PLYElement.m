@@ -12,7 +12,6 @@
 @implementation PLYElement
 {
     NSMutableArray *_properties;
-    NSData *_data;
 }
 
 - (void)addProperty:(PLYProperty *)newProperty

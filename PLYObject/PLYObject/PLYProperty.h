@@ -23,4 +23,24 @@
  */
 - (NSUInteger)scanPropertyIntoBuffer:(uint8_t *)buffer usingScanner:(NSScanner *)lineScanner;
 
+/**
+ Provides the data sizes that are configured for the property
+ @return the array of data sizes in the order they appeared in the header file
+ */
+- (NSArray *)dataSizes;
+
+/**
+ Provides the GL data types that are configured for the property
+ @return the array of GL data types in the order they appeared in the header file
+ */
+- (NSArray *)GLtypes;
+
+/**
+ Provides the property names that are configured for the property, with list
+ properties reporting the property name plus a sequential index number starting
+ from 1.
+ @return the array of property names
+ */
+- (NSArray *)propertyNames;
+
 @end

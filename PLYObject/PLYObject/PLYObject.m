@@ -158,11 +158,94 @@ const NSUInteger kPLYKeywordIndex = 0;
     return success;
 }
 
+- (NSData *)dataForElementName:(NSString *)elementName
+{
+    return [(PLYElement *)[_elements objectForKey:elementName] data];
+}
+
+- (NSArray *)sizesForElementName:(NSString *)elementName
+{
+    NSMutableArray *sizes = nil;
+    
+    PLYElement *theElement = [_elements objectForKey:elementName];
+
+    if( theElement ) {
+        sizes = [[NSMutableArray alloc] init];
+
+        // traverse the element's configured properties and assemble an array
+        PLYProperty *nextProperty = nil;
+        for( nextProperty in [theElement properties] ) {
+            [sizes addObjectsFromArray:[nextProperty dataSizes]];
+        }
+        
+        if( [sizes count] == 0 ) sizes = nil;
+    }
+    
+    // convert it to an array but only if there is data for it
+    return sizes ? [NSArray arrayWithArray:sizes] : nil;
+}
+
+- (NSArray *)GLtypesForElementName:(NSString *)elementName
+{
+    NSMutableArray *GLtypes = nil;
+    
+    PLYElement *theElement = [_elements objectForKey:elementName];
+    
+    if( theElement ) {
+        GLtypes = [[NSMutableArray alloc] init];
+        
+        // traverse the element's configured properties and assemble an array
+        PLYProperty *nextProperty = nil;
+        for( nextProperty in [theElement properties] ) {
+            [GLtypes addObjectsFromArray:[nextProperty GLtypes]];
+        }
+        
+        if( [GLtypes count] == 0 ) GLtypes = nil;
+        
+    }
+    
+    // convert it to an array but only if there is data for it
+    return GLtypes ? [NSArray arrayWithArray:GLtypes] : nil;
+
+}
+
+- (NSArray *)propertyNamesForElementName:(NSString *)elementName
+{
+    NSMutableArray *propertyNames = nil;
+    
+    PLYElement *theElement = [_elements objectForKey:elementName];
+    
+    if( theElement ) {
+        propertyNames = [[NSMutableArray alloc] init];
+        
+        // traverse the element's configured properties and assemble an array
+        PLYProperty *nextProperty = nil;
+        for( nextProperty in [theElement properties] ) {
+            [propertyNames addObjectsFromArray:[nextProperty propertyNames]];
+        }
+        
+        if( [propertyNames count] == 0 ) propertyNames = nil;
+        
+    }
+    
+    // convert it to an array but only if there is data for it
+    return propertyNames ? [NSArray arrayWithArray:propertyNames] : nil;
+}
+
+
+
 const NSUInteger kPLYMinimumElementCount = 3;
 
 const NSUInteger kPLYElementNameIndex = 1;
 const NSUInteger kPLYElementCountIndex = 2;
 
+/**
+ Process an array of data fields for a pre-qualified element string in
+ the header of a .PLY file.
+ @param fieldArray an array of strings representing each whitespace separated
+ field from a given "element" line
+ @return a PLYElement object containing the parsed data
+ */
 - (PLYElement *)processElementFieldArray:(NSArray *)fieldArray
 {
     NSString *countString = [fieldArray objectAtIndex:kPLYElementCountIndex];
@@ -185,6 +268,13 @@ const NSUInteger kPLYPropertyNameIndex = 2;
 
 NSString *const kPLYPropertyTypeList = @"list";
 
+/**
+ Process an array of data fields for a pre-qualified property string in
+ the header of a .PLY file.
+ @param fieldArray an array of strings representing each whitespace separated
+ field from a given "property" line
+ @return a PLYProperty object containing the parsed data
+ */
 - (PLYProperty *)processPropertyFieldArray:(NSArray *)fieldArray
 {
     PLYProperty *newProperty = [[PLYProperty alloc] init];
