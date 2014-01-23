@@ -52,16 +52,16 @@ NSString *const kPLYElementName = @"element";
         
         // separate the element string into whitespace delimited fields
         NSArray *elementFields = [_elementString componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-        
+
         // check a set of constraints on the fields
         if( elementFields &&
             [[elementFields objectAtIndex:kPLYElementFieldIndex] isEqualToString:kPLYElementName] &&
            ([elementFields count] >= kPLYMinimumElementCount) ) {
             
             _name = [elementFields objectAtIndex:kPLYElementNameIndex];
-            NSNumber *elementCount = [elementFields objectAtIndex:kPLYElementCountIndex];
+            NSString *elementCount = [elementFields objectAtIndex:kPLYElementCountIndex];
             if(elementCount)
-                _count = [elementCount unsignedIntegerValue];
+                _count = (NSUInteger)[elementCount integerValue];
         } else {
             // issue!!
         }
@@ -82,6 +82,77 @@ NSString *const kPLYElementName = @"element";
     return [NSArray arrayWithArray:_properties];
 }
 
+
+- (BOOL) isList
+{
+    BOOL list = NO;
+    if( [_properties count] == 1 ) {
+        list = [[_properties objectAtIndex:0] isList];
+    }
+    return list;
+}
+
+
+- (NSArray *)elementLengths
+{
+    NSArray *returnArray = nil;
+    
+    if( [_properties count] > 0 ) {
+        NSMutableArray *lengths = [[NSMutableArray alloc] init];
+        PLYProperty *nextProperty = nil;
+        for( nextProperty in _properties ) {
+            if( [nextProperty isList] ) {
+                [lengths addObject:[NSNumber numberWithUnsignedInteger:[nextProperty countLength]]];
+                [lengths addObject:[NSNumber numberWithUnsignedInteger:[nextProperty dataLength]]];
+            } else {
+                [lengths addObject:[NSNumber numberWithUnsignedInteger:[nextProperty dataLength]]];
+            }
+        }
+        returnArray = [NSArray arrayWithArray:lengths];
+    }
+    
+    return returnArray;
+}
+
+
+- (NSArray *)dataGLTypes
+{
+    NSArray *returnArray = nil;
+    
+    if( [_properties count] > 0 ) {
+        NSMutableArray *glTypes = [[NSMutableArray alloc] init];
+        PLYProperty *nextProperty = nil;
+        for( nextProperty in _properties ) {
+            if( [nextProperty isList] ) {
+                [glTypes addObject:[NSNumber numberWithUnsignedInteger:[nextProperty countGLType]]];
+                [glTypes addObject:[NSNumber numberWithUnsignedInteger:[nextProperty dataGLType]]];
+            } else {
+                [glTypes addObject:[NSNumber numberWithUnsignedInteger:[nextProperty dataGLType]]];
+            }
+        }
+        returnArray = [NSArray arrayWithArray:glTypes];
+    }
+    
+    return returnArray;
+}
+
+- (NSArray *)propertyNames
+{
+    NSArray *returnArray = nil;
+    
+    if( [_properties count] > 0 ) {
+        NSMutableArray *names = [[NSMutableArray alloc] init];
+        PLYProperty *nextProperty = nil;
+        for( nextProperty in _properties ) {
+            [names addObject:[nextProperty name]];
+        }
+        returnArray = [NSArray arrayWithArray:names];
+    }
+    
+    return returnArray;
+}
+
+
 - (void)addPropertyWithString:(NSString *)propertyString
 {
     PLYProperty *newProperty = [[PLYProperty alloc] initWithPropertyString:propertyString];
@@ -95,7 +166,6 @@ NSString *const kPLYElementName = @"element";
             [_properties addObject:newProperty];
         }
     }
-    
 }
 
 const NSUInteger kPLYBufferSize = 512;

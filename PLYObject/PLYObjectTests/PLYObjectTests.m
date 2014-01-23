@@ -48,32 +48,30 @@
     NSData *elementData = [drillShaftObject dataForElementName:@"vertex"];
     
     XCTAssertNotNil(elementData, @"PLYObject provided unepected nil data for vertex element");
-    XCTAssertEqual([elementData length], @14096, @"vertex element data object was incorrect length");
+    XCTAssertEqual([elementData length], (NSUInteger)14096, @"vertex element data object was incorrect length");
 
-    NSArray *elementSizes = [drillShaftObject sizesForElementName:@"vertex"];
+    NSArray *elementLengths = [drillShaftObject lengthsForElementName:@"vertex"];
     
-    XCTAssertNotNil(elementSizes, @"PLYObject provided unexpected nil sizes array for vertex element");
-    XCTAssertEqual([elementSizes count], @4, @"PLYObject read wrong number of properties for vertex element");
-    NSNumber *size = nil;
-    for( size in elementSizes ) {
-        XCTAssertEqual(size, @4, @"PLYObject read wrong data size for propety on vertex element");
+    XCTAssertNotNil(elementLengths, @"PLYObject provided unexpected nil sizes array for vertex element");
+    XCTAssertEqual([elementLengths count], (NSUInteger)4, @"PLYObject read wrong number of properties for vertex element");
+    NSNumber *length = nil;
+    for( length in elementLengths ) {
+        XCTAssertEqual([length unsignedIntegerValue], (NSUInteger)4, @"PLYObject read wrong data size for propety on vertex element");
     }
 
-    NSArray *elementGLtypes = [drillShaftObject GLtypesForElementName:@"vertex"];
-    XCTAssertNotNil(elementGLtypes, @"PLYObject provided unexpected nil data for vertex element");
-    NSNumber *GLtype = nil;
-    for( GLtype in elementGLtypes ) {
-        XCTAssertEqualObjects(GLtype, [NSNumber numberWithInt:GL_FLOAT], @"PLYObject provided wrong GLtype for vertex element");
+    NSArray *elementGlTypes = [drillShaftObject glTypesForElementName:@"vertex"];
+    XCTAssertNotNil(elementGlTypes, @"PLYObject provided unexpected nil data for vertex element");
+    NSNumber *glType = nil;
+    for( glType in elementGlTypes ) {
+        XCTAssertEqual([glType unsignedIntegerValue], (NSUInteger)GL_FLOAT, @"PLYObject provided wrong GLtype for vertex element");
     }
     
     NSArray *propertyNames = [drillShaftObject propertyNamesForElementName:@"vertex"];
     XCTAssertNotNil(propertyNames, @"PLYObject provided unexpected nil data for vertex element");
-    XCTAssertEqual(propertyNames[0],@"x",@"PLYObject provided wrong property name for vertex element");
-    XCTAssertEqual(propertyNames[1],@"y",@"PLYObject provided wrong property name for vertex element");
-    XCTAssertEqual(propertyNames[2],@"z",@"PLYObject provided wrong property name for vertex element");
-    XCTAssertEqual(propertyNames[3],@"confidence",@"PLYObject provided wrong property name for vertex element");
+    XCTAssertEqualObjects(propertyNames[0],@"x",@"PLYObject provided wrong property name for vertex element");
+    XCTAssertEqualObjects(propertyNames[1],@"y",@"PLYObject provided wrong property name for vertex element");
+    XCTAssertEqualObjects(propertyNames[2],@"z",@"PLYObject provided wrong property name for vertex element");
+    XCTAssertEqualObjects(propertyNames[3],@"confidence",@"PLYObject provided wrong property name for vertex element");
     
-
-
 }
 @end

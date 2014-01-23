@@ -40,13 +40,13 @@
 
 
 /**
- Obtain an array of sizes (in bytes) for each property of the element
+ Obtain an array of lengths (in bytes) for each property of the element
  name provided.
  @param elementName the name of the element
  @return array object with sizes in bytes for each property in the element
  in order of their appearance in the data set.
  */
-- (NSArray *)sizesForElementName:(NSString *)elementName;
+- (NSArray *)lengthsForElementName:(NSString *)elementName;
 
 /**
  Obtain an array of OpenGL type identifiers for each property in the element
@@ -54,7 +54,7 @@
  @return array object with the OpenGL type identifiers as values for each
  property in the element in order of their appearance in the data set.
  */
-- (NSArray *)GLtypesForElementName:(NSString *)elementName;
+- (NSArray *)glTypesForElementName:(NSString *)elementName;
 
 /**
  Obtain an array of property names in the element
