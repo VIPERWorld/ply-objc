@@ -101,6 +101,65 @@ NSString *const kTVPropertyGlTypes = @"propertyGlTypes";
     
     [_testVectorArray addObject:aTestVector];
     
+    aTestVector = [NSMutableDictionary dictionaryWithDictionary: @{ kTVFileName: @"big_porsche",
+                                                                    kTVCommentCount: @0,
+                                                                    kTVElementCount: @2,
+                                                                    kTVElementNames: @[ @"vertex", @"face" ],
+                                                                    kTVElementDataLengths: @[ @62964, @125688 ],
+                                                                    kTVPropertyNames:
+                                                                        @[ @[ @"x", @"y", @"z" ],
+                                                                           @[ @"vertex_indices" ] ],
+                                                                    kTVPropertyLengths:
+                                                                        @[ @[ @4, @4, @4 ],             // for vertex
+                                                                           @[ @1, @4 ] ],               // for face
+                                                                    kTVPropertyGlTypes:
+                                                                        @[ @[ @GL_FLOAT, @GL_FLOAT, @GL_FLOAT ],
+                                                                           @[ @GL_UNSIGNED_BYTE, @GL_INT ] ]
+                                                                    } ];
+    
+    [_testVectorArray addObject:aTestVector];
+    
+    aTestVector = [NSMutableDictionary dictionaryWithDictionary: @{ kTVFileName: @"dodecahedron",
+                                                                    kTVCommentCount: @1,
+                                                                    kTVElementCount: @2,
+                                                                    kTVElementNames: @[ @"vertex", @"face" ],
+                                                                    kTVElementDataLengths: @[ @240, @240 ],
+                                                                    kTVPropertyNames:
+                                                                        @[ @[ @"x", @"y", @"z" ],
+                                                                           @[ @"vertex_indices" ] ],
+                                                                    kTVPropertyLengths:
+                                                                        @[ @[ @4, @4, @4 ],             // for vertex
+                                                                           @[ @1, @4 ] ],               // for face
+                                                                    kTVPropertyGlTypes:
+                                                                        @[ @[ @GL_FLOAT, @GL_FLOAT, @GL_FLOAT ],
+                                                                           @[ @GL_UNSIGNED_BYTE, @GL_INT ] ]
+                                                                    } ];
+    
+    [_testVectorArray addObject:aTestVector];
+    
+    aTestVector = [NSMutableDictionary dictionaryWithDictionary: @{ kTVFileName: @"cube",
+                                                                    kTVCommentCount: @2,
+                                                                    kTVElementCount: @3,
+                                                                    kTVElementNames: @[ @"vertex", @"face", @"edge" ],
+                                                                    kTVElementDataLengths: @[ @120, @104, @55  ],
+                                                                    kTVPropertyNames:
+                                                                        @[ @[ @"x", @"y", @"z", @"red", @"green", @"blue" ],
+                                                                           @[ @"vertex_index" ],
+                                                                           @[ @"vertex1", @"vertex2", @"red", @"green", @"blue" ] ],
+                                                                    kTVPropertyLengths:
+                                                                        @[ @[ @4, @4, @4, @1, @1, @1 ],             // for vertex
+                                                                           @[ @1, @4 ],                             // for face
+                                                                           @[ @4, @4, @1, @1, @1 ] ],               // for edge
+                                                                    kTVPropertyGlTypes:
+                                                                        @[ @[ @GL_FLOAT, @GL_FLOAT, @GL_FLOAT,
+                                                                               @GL_UNSIGNED_BYTE, @GL_UNSIGNED_BYTE, @GL_UNSIGNED_BYTE],
+                                                                           @[ @GL_UNSIGNED_BYTE, @GL_INT ],
+                                                                           @[ @GL_INT, @GL_INT,
+                                                                               @GL_UNSIGNED_BYTE, @GL_UNSIGNED_BYTE, @GL_UNSIGNED_BYTE ] ]
+                                                                    } ];
+    
+    [_testVectorArray addObject:aTestVector];
+    
     NSBundle *testClassBundle = [NSBundle bundleForClass:[PLYObjectTests class]];
     
     // set up URLs for each item

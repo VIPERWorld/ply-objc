@@ -9,6 +9,9 @@
 /* Begin PBXBuildFile section */
 		1B64A6FF1891A484005F760D /* dragon_vrip_res4.ply in Resources */ = {isa = PBXBuildFile; fileRef = 1B64A6FE1891A47B005F760D /* dragon_vrip_res4.ply */; };
 		1B64A7011891B675005F760D /* airplane.ply in Resources */ = {isa = PBXBuildFile; fileRef = 1B64A7001891B675005F760D /* airplane.ply */; };
+		1B64A7031891D064005F760D /* big_porsche.ply in Resources */ = {isa = PBXBuildFile; fileRef = 1B64A7021891D064005F760D /* big_porsche.ply */; };
+		1B64A7051891D18C005F760D /* dodecahedron.ply in Resources */ = {isa = PBXBuildFile; fileRef = 1B64A7041891D18C005F760D /* dodecahedron.ply */; };
+		1B64A7071891D326005F760D /* cube.ply in Resources */ = {isa = PBXBuildFile; fileRef = 1B64A7061891D326005F760D /* cube.ply */; };
 		5514BA7F188B10580018CBFE /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5514BA7E188B10580018CBFE /* Cocoa.framework */; };
 		5514BA89188B10580018CBFE /* PLYObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 5514BA88188B10580018CBFE /* PLYObject.m */; };
 		5514BA90188B10580018CBFE /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5514BA8F188B10580018CBFE /* XCTest.framework */; };
@@ -36,6 +39,9 @@
 /* Begin PBXFileReference section */
 		1B64A6FE1891A47B005F760D /* dragon_vrip_res4.ply */ = {isa = PBXFileReference; lastKnownFileType = text; path = dragon_vrip_res4.ply; sourceTree = "<group>"; };
 		1B64A7001891B675005F760D /* airplane.ply */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = airplane.ply; sourceTree = "<group>"; };
+		1B64A7021891D064005F760D /* big_porsche.ply */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = big_porsche.ply; sourceTree = "<group>"; };
+		1B64A7041891D18C005F760D /* dodecahedron.ply */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = dodecahedron.ply; sourceTree = "<group>"; };
+		1B64A7061891D326005F760D /* cube.ply */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = cube.ply; sourceTree = "<group>"; };
 		5514BA7B188B10580018CBFE /* PLYObject.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = PLYObject.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		5514BA7E188B10580018CBFE /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		5514BA81188B10580018CBFE /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -151,7 +157,10 @@
 		5514BA96188B10580018CBFE /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
+				1B64A7061891D326005F760D /* cube.ply */,
 				5514BAB1188E232D0018CBFE /* drill_shaft_zip.ply */,
+				1B64A7041891D18C005F760D /* dodecahedron.ply */,
+				1B64A7021891D064005F760D /* big_porsche.ply */,
 				1B64A7001891B675005F760D /* airplane.ply */,
 				1B64A6FE1891A47B005F760D /* dragon_vrip_res4.ply */,
 				5514BA97188B10580018CBFE /* PLYObjectTests-Info.plist */,
@@ -248,7 +257,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				1B64A6FF1891A484005F760D /* dragon_vrip_res4.ply in Resources */,
+				1B64A7071891D326005F760D /* cube.ply in Resources */,
 				5514BAB2188E47850018CBFE /* drill_shaft_zip.ply in Resources */,
+				1B64A7031891D064005F760D /* big_porsche.ply in Resources */,
+				1B64A7051891D18C005F760D /* dodecahedron.ply in Resources */,
 				5514BA9A188B10580018CBFE /* InfoPlist.strings in Resources */,
 				1B64A7011891B675005F760D /* airplane.ply in Resources */,
 			);
