@@ -83,6 +83,24 @@ NSString *const kTVPropertyGlTypes = @"propertyGlTypes";
     
     [_testVectorArray addObject:aTestVector];
 
+    aTestVector = [NSMutableDictionary dictionaryWithDictionary: @{ kTVFileName: @"airplane",
+                                                                    kTVCommentCount: @0,
+                                                                    kTVElementCount: @2,
+                                                                    kTVElementNames: @[ @"vertex", @"face" ],
+                                                                    kTVElementDataLengths: @[ @16020, @29424 ],
+                                                                    kTVPropertyNames:
+                                                                        @[ @[ @"x", @"y", @"z" ],
+                                                                           @[ @"vertex_indices" ] ],
+                                                                    kTVPropertyLengths:
+                                                                        @[ @[ @4, @4, @4 ],             // for vertex
+                                                                           @[ @1, @4 ] ],               // for face
+                                                                    kTVPropertyGlTypes:
+                                                                        @[ @[ @GL_FLOAT, @GL_FLOAT, @GL_FLOAT ],
+                                                                           @[ @GL_UNSIGNED_BYTE, @GL_INT ] ]
+                                                                    } ];
+    
+    [_testVectorArray addObject:aTestVector];
+    
     NSBundle *testClassBundle = [NSBundle bundleForClass:[PLYObjectTests class]];
     
     // set up URLs for each item

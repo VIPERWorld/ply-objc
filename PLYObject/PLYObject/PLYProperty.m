@@ -224,7 +224,7 @@ NSString *const kPLYPropertyName = @"property";
             break;
             
         case PLYDataTypeShort:
-            *(int16_t *)buffer = (uint16_t)doubleValue;
+            *(int16_t *)buffer = (int16_t)doubleValue;
             break;
             
         case PLYDataTypeUshort:
@@ -232,7 +232,7 @@ NSString *const kPLYPropertyName = @"property";
             break;
             
         case PLYDataTypeInt:
-            *(int32_t *)buffer = (uint16_t)doubleValue;
+            *(int32_t *)buffer = (int32_t)doubleValue;
             break;
             
         case PLYDataTypeUint:
@@ -273,7 +273,15 @@ NSString *const kPLYPropertyName = @"property";
                                         @"uint": [NSNumber numberWithInt:PLYDataTypeUint],
                                         @"float": [NSNumber numberWithInt:PLYDataTypeFloat],
                                         @"double": [NSNumber numberWithInt:PLYDataTypeDouble],
-                                        @"list": [NSNumber numberWithInt:PLYDataTypeList]
+                                        @"list": [NSNumber numberWithInt:PLYDataTypeList],
+                                        @"int8": [NSNumber numberWithInt:PLYDataTypeChar],
+                                        @"uint8": [NSNumber numberWithInt:PLYDataTypeUchar],
+                                        @"int16": [NSNumber numberWithInt:PLYDataTypeShort],
+                                        @"uint16": [NSNumber numberWithInt:PLYDataTypeUshort],
+                                        @"int32": [NSNumber numberWithInt:PLYDataTypeInt],
+                                        @"uint32": [NSNumber numberWithInt:PLYDataTypeUint],
+                                        @"float32": [NSNumber numberWithInt:PLYDataTypeFloat],
+                                        @"float64": [NSNumber numberWithInt:PLYDataTypeDouble]
                                         };
 
     NSNumber *numberForDataType = [plyEnumForDataType objectForKey:propertyString];

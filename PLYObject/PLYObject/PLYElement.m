@@ -173,40 +173,56 @@ const NSUInteger kPLYBufferSize = 512;
 - (NSUInteger)readFromStrings:(NSArray *)strings startPosition:(NSUInteger)start
 {
     __block NSUInteger readLines = 0;
+    __block NSUInteger readElements = 0;
     
-    NSIndexSet *elementSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(start, _count)];
-    __block NSMutableData *elementData = [[NSMutableData alloc] init];
-    
-    uint8_t *lineBuffer = calloc(kPLYBufferSize, sizeof(uint8_t));
+    NSInteger end = [strings count] - start;
 
-    [strings enumerateObjectsAtIndexes:elementSet
-                               options:0
-                            usingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
-                                
-                                NSScanner *lineScanner = [NSScanner scannerWithString:(NSString *)obj];
-                                
-                                PLYProperty *nextProperty;
-                                NSUInteger bytes, totalBytes;
-                                
-                                uint8_t *buffer = lineBuffer;
-                                totalBytes = 0;
-                                
-                                for( nextProperty in _properties ) {
-                                    bytes = [nextProperty scanPropertyIntoBuffer:(uint8_t *)buffer
-                                                                    usingScanner:lineScanner];
-                                    buffer += bytes;
-                                    totalBytes += bytes;
-                                }
-                                
-                                [elementData appendBytes:lineBuffer length:totalBytes];
-                                
-                                readLines += (totalBytes > 0) ? 1 : 0; // gratuitous ternary action
-    
-                            }];
-    
-    _data = [NSData dataWithData:elementData];
-    
-    free(lineBuffer);
+    if( end > 0 ) {
+        
+        NSIndexSet *elementSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(start, end)];
+        __block NSMutableData *elementData = [[NSMutableData alloc] init];
+        
+        uint8_t *lineBuffer = calloc(kPLYBufferSize, sizeof(uint8_t));
+
+        [strings enumerateObjectsAtIndexes:elementSet
+                                   options:0
+                                usingBlock:^(id obj, NSUInteger idx, BOOL *stop) {
+                                    
+                                    if( [obj length] > 0 ) {
+                                        
+                                        NSScanner *lineScanner = [NSScanner scannerWithString:(NSString *)obj];
+                                        
+                                        PLYProperty *nextProperty;
+                                        NSUInteger bytes, totalBytes;
+                                        
+                                        uint8_t *buffer = lineBuffer;
+                                        totalBytes = 0;
+                                        
+                                        for( nextProperty in _properties ) {
+                                            bytes = [nextProperty scanPropertyIntoBuffer:(uint8_t *)buffer
+                                                                            usingScanner:lineScanner];
+                                            buffer += bytes;
+                                            totalBytes += bytes;
+                                        }
+                                        
+                                        [elementData appendBytes:lineBuffer length:totalBytes];
+                                        
+                                        readElements += (totalBytes > 0) ? 1 : 0; // gratuitous ternary action
+
+                                    }
+                                    
+                                    if( readElements == _count ) {
+                                        *stop = YES;
+                                    }
+                                    
+                                    readLines++;
+                                    
+                                }];
+        
+        _data = [NSData dataWithData:elementData];
+        
+        free(lineBuffer);
+    }
     
     return readLines;
 }
