@@ -31,4 +31,37 @@
  */
 - (BOOL)readFromURL:(NSURL *)url error:(NSError **)error;
 
+/**
+ Obtain the binary data for the supplied element name
+ @param elementName the name of the element
+ @return data object for the element, or nil if data is not available
+ */
+- (NSData *)dataForElementName:(NSString *)elementName;
+
+
+/**
+ Obtain an array of lengths (in bytes) for each property of the element
+ name provided.
+ @param elementName the name of the element
+ @return array object with sizes in bytes for each property in the element
+ in order of their appearance in the data set.
+ */
+- (NSArray *)lengthsForElementName:(NSString *)elementName;
+
+/**
+ Obtain an array of OpenGL type identifiers for each property in the element
+ @param elementName the name of the element
+ @return array object with the OpenGL type identifiers as values for each
+ property in the element in order of their appearance in the data set.
+ */
+- (NSArray *)glTypesForElementName:(NSString *)elementName;
+
+/**
+ Obtain an array of property names in the element
+ @param elementName the name of the element
+ @return array object with the property names for the element, in order of
+ their appearance in the data set
+ */
+- (NSArray *)propertyNamesForElementName:(NSString *)elementName;
+
 @end

@@ -99,38 +99,41 @@ const NSUInteger kPLYKeywordIndex = 0;
             _comments = [_fileStringArray objectsAtIndexes:commentSet];
             
             NSMutableDictionary *elementWork = [[NSMutableDictionary alloc] init];
-            __block PLYElement *newElement = nil;
+            
+            __block PLYElement *currentElement = nil;
             
             // go through all of the elements that were previously identified, process each,
             // and add to the working dictionary
             [elementSet enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
                 
                 NSString *fieldString = [_fileStringArray objectAtIndex:idx];
-                NSArray *fieldArray = [fieldString componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
                 
-                if( [[fieldArray objectAtIndex:kPLYKeywordIndex] isEqualToString:kPLYElementKeyword] ) {
+                NSRange resultRangeElement = [fieldString rangeOfString:kPLYElementKeyword];
+                NSRange resultRangeProperty = [fieldString rangeOfString:kPLYPropertyKeyword];
 
-                    if( newElement ) {
-                        [elementWork setObject:newElement forKey:[newElement name]];
-                        [_elementNames addObject:[newElement name]];
-                        newElement = nil;
+                if( resultRangeElement.location == 0 ) {
+
+                    if( currentElement ) {
+                        [elementWork setObject:currentElement forKey:[currentElement name]];
+                        [_elementNames addObject:[currentElement name]];
+                        currentElement = nil;
                     }
                     
-                    newElement = [self processElementFieldArray:fieldArray];
+                    currentElement = [[PLYElement alloc] initWithElementString:fieldString];
                     
-                } else if( [[fieldArray objectAtIndex:kPLYKeywordIndex] isEqualToString:kPLYPropertyKeyword] ) {
+                } else if( resultRangeProperty.location == 0 ) {
                     
-                    PLYProperty *newProperty = [self processPropertyFieldArray:fieldArray];
-                    if(newProperty && newElement)
-                        [newElement addProperty:newProperty];
+                    if( currentElement ) {
+                        [currentElement addPropertyWithString:fieldString];
+                    }
                 }
                 
             }];
             
-            if( newElement ) {
-                [elementWork setObject:newElement forKey:[newElement name]];
-                [_elementNames addObject:[newElement name]];
-                newElement = nil;
+            if( currentElement ) {
+                [elementWork setObject:currentElement forKey:[currentElement name]];
+                [_elementNames addObject:[currentElement name]];
+                currentElement = nil;
             }
             
             _elements = [NSDictionary dictionaryWithDictionary:elementWork];
@@ -158,51 +161,55 @@ const NSUInteger kPLYKeywordIndex = 0;
     return success;
 }
 
-const NSUInteger kPLYMinimumElementCount = 3;
-
-const NSUInteger kPLYElementNameIndex = 1;
-const NSUInteger kPLYElementCountIndex = 2;
-
-- (PLYElement *)processElementFieldArray:(NSArray *)fieldArray
+- (NSData *)dataForElementName:(NSString *)elementName
 {
-    NSString *countString = [fieldArray objectAtIndex:kPLYElementCountIndex];
-    
-    PLYElement *newElement = [[PLYElement alloc] init];
-    newElement.name = [fieldArray objectAtIndex:kPLYElementNameIndex];
-    newElement.count = (NSUInteger)[countString integerValue];
-    
-    return newElement;
+    return [(PLYElement *)[_elements objectForKey:elementName] data];
 }
 
-const NSUInteger kPLYMinimumPropertyCount = 3;
-const NSUInteger kPLYMinimumPropertyListCount = 5;
-
-const NSUInteger kPLYPropertyTypeIndex = 1;
-const NSUInteger kPLYPropertyListCountTypeIndex = 2;
-const NSUInteger kPLYPropertyListDataTypeIndex = 3;
-const NSUInteger kPLYPropertyListNameIndex = 4;
-const NSUInteger kPLYPropertyNameIndex = 2;
-
-NSString *const kPLYPropertyTypeList = @"list";
-
-- (PLYProperty *)processPropertyFieldArray:(NSArray *)fieldArray
+- (NSArray *)lengthsForElementName:(NSString *)elementName
 {
-    PLYProperty *newProperty = [[PLYProperty alloc] init];
+    NSArray *lengths = nil;
     
-    NSString *propertyType = [fieldArray objectAtIndex:kPLYPropertyTypeIndex];
-    newProperty.type = propertyType;
-    
-    if( [propertyType isEqualToString:kPLYPropertyTypeList] ) {
-        newProperty.name = [fieldArray objectAtIndex:kPLYPropertyListNameIndex];
-        newProperty.dataType = [fieldArray objectAtIndex:kPLYPropertyListDataTypeIndex];
-        newProperty.countType = [fieldArray objectAtIndex:kPLYPropertyListCountTypeIndex];
-    } else {
-        newProperty.name = [fieldArray objectAtIndex:kPLYPropertyNameIndex];
-        newProperty.dataType = propertyType;
+    PLYElement *theElement = [_elements objectForKey:elementName];
+
+    if( theElement ) {
+        lengths = [theElement elementLengths];
+        if( [lengths count] == 0 ) lengths = nil;
     }
     
-    return newProperty;
+    // convert it to an array but only if there is data for it
+    return lengths;
 }
 
+- (NSArray *)glTypesForElementName:(NSString *)elementName
+{
+    NSArray *GLtypes = nil;
+    
+    PLYElement *theElement = [_elements objectForKey:elementName];
+    
+    if( theElement ) {
+        GLtypes = [theElement dataGLTypes];
+        if( [GLtypes count] == 0 ) GLtypes = nil;
+    }
+    
+    // convert it to an array but only if there is data for it
+    return GLtypes;
+}
+
+- (NSArray *)propertyNamesForElementName:(NSString *)elementName
+{
+    NSArray *propertyNames = nil;
+    
+    PLYElement *theElement = [_elements objectForKey:elementName];
+    
+    if( theElement ) {
+        propertyNames = [theElement propertyNames];
+        if( [propertyNames count] == 0 ) propertyNames = nil;
+        
+    }
+    
+    // convert it to an array but only if there is data for it
+    return propertyNames;
+}
 
 @end

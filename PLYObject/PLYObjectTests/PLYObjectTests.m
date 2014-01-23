@@ -46,15 +46,31 @@
     
     PLYElement *nextElement = [[drillShaftObject elements] objectForKey:@"vertex"];
     
-    XCTAssertNotNil(nextElement, @"PLYObject provided unexpected nil for PLYElement.");
-    XCTAssertEqual([nextElement count], (NSUInteger)881, @"vertex element did not contain expected element count");
-    XCTAssertEqual([[nextElement properties] count], (NSUInteger)4, @"vertex element did not contain expected property count");
-    
-    nextElement = [[drillShaftObject elements] objectForKey:@"face"];
-    
-    XCTAssertNotNil(nextElement, @"PLYObject provided unexpected nil for PLYElement.");
-    XCTAssertEqual([nextElement count], (NSUInteger)1288, @"face element did not contain expected element count");
-    XCTAssertEqual([[nextElement properties] count], (NSUInteger)1, @"face element did not contain expected property count");
+    XCTAssertNotNil(elementData, @"PLYObject provided unepected nil data for vertex element");
+    XCTAssertEqual([elementData length], (NSUInteger)14096, @"vertex element data object was incorrect length");
 
+    NSArray *elementLengths = [drillShaftObject lengthsForElementName:@"vertex"];
+    
+    XCTAssertNotNil(elementLengths, @"PLYObject provided unexpected nil sizes array for vertex element");
+    XCTAssertEqual([elementLengths count], (NSUInteger)4, @"PLYObject read wrong number of properties for vertex element");
+    NSNumber *length = nil;
+    for( length in elementLengths ) {
+        XCTAssertEqual([length unsignedIntegerValue], (NSUInteger)4, @"PLYObject read wrong data size for propety on vertex element");
+    }
+
+    NSArray *elementGlTypes = [drillShaftObject glTypesForElementName:@"vertex"];
+    XCTAssertNotNil(elementGlTypes, @"PLYObject provided unexpected nil data for vertex element");
+    NSNumber *glType = nil;
+    for( glType in elementGlTypes ) {
+        XCTAssertEqual([glType unsignedIntegerValue], (NSUInteger)GL_FLOAT, @"PLYObject provided wrong GLtype for vertex element");
+    }
+    
+    NSArray *propertyNames = [drillShaftObject propertyNamesForElementName:@"vertex"];
+    XCTAssertNotNil(propertyNames, @"PLYObject provided unexpected nil data for vertex element");
+    XCTAssertEqualObjects(propertyNames[0],@"x",@"PLYObject provided wrong property name for vertex element");
+    XCTAssertEqualObjects(propertyNames[1],@"y",@"PLYObject provided wrong property name for vertex element");
+    XCTAssertEqualObjects(propertyNames[2],@"z",@"PLYObject provided wrong property name for vertex element");
+    XCTAssertEqualObjects(propertyNames[3],@"confidence",@"PLYObject provided wrong property name for vertex element");
+    
 }
 @end
