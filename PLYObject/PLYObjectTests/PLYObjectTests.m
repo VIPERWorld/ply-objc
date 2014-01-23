@@ -34,6 +34,9 @@ NSString *const kTVCommentCount = @"commentCount";
 NSString *const kTVElementCount = @"elementCount";
 NSString *const kTVElementNames = @"elementNames";
 NSString *const kTVElementDataLengths = @"elementDataLengths";
+NSString *const kTVPropertyNames = @"propertyNames";
+NSString *const kTVPropertyLengths = @"propertyDataLengths";
+NSString *const kTVPropertyGlTypes = @"propertyGlTypes";
 
 - (void)setUp
 {
@@ -48,7 +51,17 @@ NSString *const kTVElementDataLengths = @"elementDataLengths";
                                                                     kTVCommentCount: @0,
                                                                     kTVElementCount: @2,
                                                                     kTVElementNames: @[ @"vertex", @"face" ],
-                                                                    kTVElementDataLengths: @[ @14096, @15456 ] } ];
+                                                                    kTVElementDataLengths: @[ @14096, @15456 ],
+                                                                    kTVPropertyNames:
+                                                                        @[ @[ @"x", @"y", @"z", @"confidence" ],
+                                                                           @[ @"vertex_indices" ] ],
+                                                                    kTVPropertyLengths:
+                                                                        @[ @[ @4, @4, @4, @4 ],         // for vertex
+                                                                           @[ @1, @4 ] ],               // for face
+                                                                    kTVPropertyGlTypes:
+                                                                        @[ @[ @GL_FLOAT, @GL_FLOAT, @GL_FLOAT, @GL_FLOAT ],
+                                                                           @[ @GL_UNSIGNED_BYTE, @GL_INT ] ]
+                                                                    } ];
     
     [_testVectorArray addObject:aTestVector];
     
@@ -56,7 +69,17 @@ NSString *const kTVElementDataLengths = @"elementDataLengths";
                                                                     kTVCommentCount: @1,
                                                                     kTVElementCount: @2,
                                                                     kTVElementNames: @[ @"vertex", @"face" ],
-                                                                    kTVElementDataLengths: @[ @62460, @133224 ] } ];
+                                                                    kTVElementDataLengths: @[ @62460, @133224 ],
+                                                                    kTVPropertyNames:
+                                                                        @[ @[ @"x", @"y", @"z" ],
+                                                                           @[ @"vertex_indices" ] ],
+                                                                    kTVPropertyLengths:
+                                                                        @[ @[ @4, @4, @4 ],             // for vertex
+                                                                           @[ @1, @4 ] ],               // for face
+                                                                    kTVPropertyGlTypes:
+                                                                        @[ @[ @GL_FLOAT, @GL_FLOAT, @GL_FLOAT ],
+                                                                           @[ @GL_UNSIGNED_BYTE, @GL_INT ] ]
+                                                                    } ];
     
     [_testVectorArray addObject:aTestVector];
 
@@ -161,18 +184,85 @@ NSString *const kTVElementDataLengths = @"elementDataLengths";
 
 - (void) testLengths
 {
-    // test for matching data length arrays
+    NSMutableDictionary *aTestVector = nil;
+    PLYObject *testObject = nil;
+    
+    for( aTestVector in _testVectorArray ) {
+        testObject = [aTestVector objectForKey:kTVPlyObject];
+        
+        NSString *trueElementName = nil;
+        NSArray *trueElementNames = [aTestVector objectForKey:kTVElementNames];
+        NSArray *trueAllPropertyLength = [aTestVector objectForKey:kTVPropertyLengths];
+        
+        for( trueElementName in trueElementNames ) {
+            
+            NSUInteger elementIndex = [trueElementNames indexOfObject:trueElementName];
+            NSArray *truePropertyLengths = [trueAllPropertyLength objectAtIndex:elementIndex];
+            
+            NSArray *testPropertyLengths = [testObject lengthsForElementName:trueElementName];
+            
+            XCTAssertEqualObjects(testPropertyLengths, truePropertyLengths,
+                                  @"File %@ element %@ property lengths do not match.",
+                                  [aTestVector objectForKey:kTVFileName],
+                                  trueElementName);
+        }
+    }
+
 }
 
 - (void) testGlTypes
 {
-    // test for matching GL data type arrays
+    NSMutableDictionary *aTestVector = nil;
+    PLYObject *testObject = nil;
+    
+    for( aTestVector in _testVectorArray ) {
+        testObject = [aTestVector objectForKey:kTVPlyObject];
+        
+        NSString *trueElementName = nil;
+        NSArray *trueElementNames = [aTestVector objectForKey:kTVElementNames];
+        NSArray *trueAllGlTypes = [aTestVector objectForKey:kTVPropertyGlTypes];
+        
+        for( trueElementName in trueElementNames ) {
+            
+            NSUInteger elementIndex = [trueElementNames indexOfObject:trueElementName];
+            NSArray *trueGlTypes = [trueAllGlTypes objectAtIndex:elementIndex];
+            
+            NSArray *testGlTypes = [testObject glTypesForElementName:trueElementName];
+            
+            XCTAssertEqualObjects(testGlTypes, trueGlTypes,
+                                  @"File %@ element %@ OpenGL data types do not match.",
+                                  [aTestVector objectForKey:kTVFileName],
+                                  trueElementName);
+        }
+    }
+    
 }
 
 - (void) testPropertyNames
 {
-    // test for number of properties
-    // test for matching property names
+    NSMutableDictionary *aTestVector = nil;
+    PLYObject *testObject = nil;
+    
+    for( aTestVector in _testVectorArray ) {
+        testObject = [aTestVector objectForKey:kTVPlyObject];
+        
+        NSString *trueElementName = nil;
+        NSArray *trueElementNames = [aTestVector objectForKey:kTVElementNames];
+        NSArray *trueAllPropertyNames = [aTestVector objectForKey:kTVPropertyNames];
+        
+        for( trueElementName in trueElementNames ) {
+            
+            NSUInteger elementIndex = [trueElementNames indexOfObject:trueElementName];
+            NSArray *truePropertyNames = [trueAllPropertyNames objectAtIndex:elementIndex];
+            
+            NSArray *testPropertyNames = [testObject propertyNamesForElementName:trueElementName];
+            
+            XCTAssertEqualObjects(testPropertyNames, truePropertyNames,
+                                  @"File %@ element %@ property names do not match.",
+                                  [aTestVector objectForKey:kTVFileName],
+                                  trueElementName);
+        }
+    }
 }
 
 @end

@@ -104,6 +104,8 @@ NSString *const kPLYPropertyName = @"property";
                     // issue
                 } else {
                     
+                    _name = [propertyFields objectAtIndex:kPLYPropertyListNameIndex];
+                    
                     _dataTypeString = [propertyFields objectAtIndex:kPLYPropertyListDataTypeIndex];
                     _dataType = [self dataTypeForPropertyString:_dataTypeString];
                     
