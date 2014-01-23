@@ -6,6 +6,11 @@
 //  Copyright (c) 2014 David T. Brown. All rights reserved.
 //
 
+/**
+ Data files from: http://people.sc.fsu.edu/~jburkardt/data/ply/ply.html
+ 
+ */
+
 #import <XCTest/XCTest.h>
 #import "PLYObject.h"
 #import "PLYElement.h"
@@ -16,11 +21,64 @@
 @end
 
 @implementation PLYObjectTests
+{
+    NSURL *_drillPlyUrl;
+    PLYObject *_drillShaftObject;
+    NSMutableArray *_testVectorArray;
+}
+
+NSString *const kTVFileName = @"fileName";
+NSString *const kTVFileURL = @"fileURL";
+NSString *const kTVPlyObject = @"plyObject";
+NSString *const kTVCommentCount = @"commentCount";
+NSString *const kTVElementCount = @"elementCount";
+NSString *const kTVElementNames = @"elementNames";
+NSString *const kTVElementDataLengths = @"elementDataLengths";
 
 - (void)setUp
 {
     [super setUp];
     // Put setup code here. This method is called before the invocation of each test method in the class.
+
+    _testVectorArray = [[NSMutableArray alloc] init];
+    
+    NSMutableDictionary *aTestVector = nil;
+    
+    aTestVector = [NSMutableDictionary dictionaryWithDictionary: @{ kTVFileName: @"drill_shaft_zip",
+                                                                    kTVCommentCount: @0,
+                                                                    kTVElementCount: @2,
+                                                                    kTVElementNames: @[ @"vertex", @"face" ],
+                                                                    kTVElementDataLengths: @[ @14096, @15456 ] } ];
+    
+    [_testVectorArray addObject:aTestVector];
+    
+    aTestVector = [NSMutableDictionary dictionaryWithDictionary: @{ kTVFileName: @"dragon_vrip_res4",
+                                                                    kTVCommentCount: @1,
+                                                                    kTVElementCount: @2,
+                                                                    kTVElementNames: @[ @"vertex", @"face" ],
+                                                                    kTVElementDataLengths: @[ @62460, @133224 ] } ];
+    
+    [_testVectorArray addObject:aTestVector];
+
+    NSBundle *testClassBundle = [NSBundle bundleForClass:[PLYObjectTests class]];
+    
+    // set up URLs for each item
+    for( aTestVector in _testVectorArray ) {
+    
+        NSURL *plyUrl = [testClassBundle URLForResource:[aTestVector objectForKey:kTVFileName]
+                                          withExtension:@"ply"];
+        
+        XCTAssertNotNil(plyUrl, @"Could not make URL for file %@",[aTestVector objectForKey:kTVFileName]);
+        
+        [aTestVector setObject:plyUrl forKey:kTVFileURL];
+        
+        PLYObject *aPlyObject = [[PLYObject alloc] init];
+
+        XCTAssertTrue([aPlyObject readFromURL:plyUrl error:NULL],@"PLYObject failed reading URL %@",plyUrl);
+        [aTestVector setObject:aPlyObject forKey:kTVPlyObject];
+        
+    }
+    
 }
 
 - (void)tearDown
@@ -29,50 +87,92 @@
     [super tearDown];
 }
 
-- (void)testPLYObject
+- (void)testReadFromUrl
 {
-    
-    NSURL *plyUrl = [[NSBundle bundleForClass:[PLYObjectTests class]] URLForResource:@"drill_shaft_zip" withExtension:@"ply"];
-    PLYObject *drillShaftObject = [[PLYObject alloc] init];
-    
-    XCTAssertNotNil(drillShaftObject, @"PLYObject did not allocate properly.");
-    
-    [drillShaftObject readFromURL:plyUrl error:NULL];
-    
-    XCTAssertEqual([[drillShaftObject comments] count], (NSUInteger)0, @"PLYObject read wrong number of comments.");
-    
-    XCTAssertEqual([[[drillShaftObject elements] allKeys] count], (NSUInteger)2, @"PLYObject read wrong number of elements.");
-    
-    // TODO: need more detailed checks of these elements
-    
-    PLYElement *nextElement = [[drillShaftObject elements] objectForKey:@"vertex"];
-    NSData *elementData = [nextElement data];
-    
-    XCTAssertNotNil(elementData, @"PLYObject provided unepected nil data for vertex element");
-    XCTAssertEqual([elementData length], (NSUInteger)14096, @"vertex element data object was incorrect length");
-
-    NSArray *elementLengths = [drillShaftObject lengthsForElementName:@"vertex"];
-    
-    XCTAssertNotNil(elementLengths, @"PLYObject provided unexpected nil sizes array for vertex element");
-    XCTAssertEqual([elementLengths count], (NSUInteger)4, @"PLYObject read wrong number of properties for vertex element");
-    NSNumber *length = nil;
-    for( length in elementLengths ) {
-        XCTAssertEqual([length unsignedIntegerValue], (NSUInteger)4, @"PLYObject read wrong data size for propety on vertex element");
-    }
-
-    NSArray *elementGlTypes = [drillShaftObject glTypesForElementName:@"vertex"];
-    XCTAssertNotNil(elementGlTypes, @"PLYObject provided unexpected nil data for vertex element");
-    NSNumber *glType = nil;
-    for( glType in elementGlTypes ) {
-        XCTAssertEqual([glType unsignedIntegerValue], (NSUInteger)GL_FLOAT, @"PLYObject provided wrong GLtype for vertex element");
-    }
-    
-    NSArray *propertyNames = [drillShaftObject propertyNamesForElementName:@"vertex"];
-    XCTAssertNotNil(propertyNames, @"PLYObject provided unexpected nil data for vertex element");
-    XCTAssertEqualObjects(propertyNames[0],@"x",@"PLYObject provided wrong property name for vertex element");
-    XCTAssertEqualObjects(propertyNames[1],@"y",@"PLYObject provided wrong property name for vertex element");
-    XCTAssertEqualObjects(propertyNames[2],@"z",@"PLYObject provided wrong property name for vertex element");
-    XCTAssertEqualObjects(propertyNames[3],@"confidence",@"PLYObject provided wrong property name for vertex element");
-    
+    // TBD
 }
+
+- (void)testComments
+{
+    NSMutableDictionary *aTestVector = nil;
+    PLYObject *testObject = nil;
+    
+    for( aTestVector in _testVectorArray ) {
+        testObject = [aTestVector objectForKey:kTVPlyObject];
+        NSUInteger trueCommentCount = [[aTestVector objectForKey:kTVCommentCount] unsignedIntegerValue];
+        NSUInteger testCommentCount = [[testObject comments] count];
+        
+        XCTAssertEqual(testCommentCount, trueCommentCount, @"PLYObject read wrong number of comments.");
+    }
+}
+
+- (void) testElements
+{
+    NSMutableDictionary *aTestVector = nil;
+    PLYObject *testObject = nil;
+
+    for( aTestVector in _testVectorArray ) {
+        testObject = [aTestVector objectForKey:kTVPlyObject];
+        NSUInteger trueElementCount = [[aTestVector objectForKey:kTVElementCount] unsignedIntegerValue];
+
+        NSDictionary *testElements = [testObject elements];
+        XCTAssertEqual([[testElements allKeys] count], trueElementCount,
+                       @"File %@ PLYObject read wrong number of elements.",
+                       [aTestVector objectForKey:kTVFileName]);
+        
+        NSString *trueElementName = nil;
+        NSArray *trueElementNames = [aTestVector objectForKey:kTVElementNames];
+        
+        for( trueElementName in trueElementNames ) {
+            
+            id testElementObj = [testElements objectForKey:trueElementName];
+            XCTAssertTrue([testElementObj isKindOfClass:[PLYElement class]], @"Element %@ is not a PLYElement class",trueElementName);
+            
+        }
+    }
+}
+
+- (void) testData
+{
+    NSMutableDictionary *aTestVector = nil;
+    PLYObject *testObject = nil;
+    
+    for( aTestVector in _testVectorArray ) {
+        testObject = [aTestVector objectForKey:kTVPlyObject];
+
+        NSString *trueElementName = nil;
+        NSArray *trueElementNames = [aTestVector objectForKey:kTVElementNames];
+        NSArray *trueElementDataLengths = [aTestVector objectForKey:kTVElementDataLengths];
+        
+        for( trueElementName in trueElementNames ) {
+
+            NSUInteger elementIndex = [trueElementNames indexOfObject:trueElementName];
+            NSUInteger trueElementDataLength = [[trueElementDataLengths objectAtIndex:elementIndex] unsignedIntegerValue];
+            
+            NSData *testData = [testObject dataForElementName:trueElementName];
+
+            XCTAssertEqual( [testData length], trueElementDataLength,
+                           @"File %@ element %@ data length does not match.",
+                           [aTestVector objectForKey:kTVFileName],trueElementName);
+            
+        }
+    }
+}
+
+- (void) testLengths
+{
+    // test for matching data length arrays
+}
+
+- (void) testGlTypes
+{
+    // test for matching GL data type arrays
+}
+
+- (void) testPropertyNames
+{
+    // test for number of properties
+    // test for matching property names
+}
+
 @end

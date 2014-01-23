@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1B64A6FF1891A484005F760D /* dragon_vrip_res4.ply in Resources */ = {isa = PBXBuildFile; fileRef = 1B64A6FE1891A47B005F760D /* dragon_vrip_res4.ply */; };
 		5514BA7F188B10580018CBFE /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5514BA7E188B10580018CBFE /* Cocoa.framework */; };
 		5514BA89188B10580018CBFE /* PLYObject.m in Sources */ = {isa = PBXBuildFile; fileRef = 5514BA88188B10580018CBFE /* PLYObject.m */; };
 		5514BA90188B10580018CBFE /* XCTest.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 5514BA8F188B10580018CBFE /* XCTest.framework */; };
@@ -32,6 +33,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		1B64A6FE1891A47B005F760D /* dragon_vrip_res4.ply */ = {isa = PBXFileReference; lastKnownFileType = text; path = dragon_vrip_res4.ply; sourceTree = "<group>"; };
 		5514BA7B188B10580018CBFE /* PLYObject.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = PLYObject.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		5514BA7E188B10580018CBFE /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		5514BA81188B10580018CBFE /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
@@ -148,6 +150,7 @@
 			isa = PBXGroup;
 			children = (
 				5514BAB1188E232D0018CBFE /* drill_shaft_zip.ply */,
+				1B64A6FE1891A47B005F760D /* dragon_vrip_res4.ply */,
 				5514BA97188B10580018CBFE /* PLYObjectTests-Info.plist */,
 				5514BA98188B10580018CBFE /* InfoPlist.strings */,
 			);
@@ -241,6 +244,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1B64A6FF1891A484005F760D /* dragon_vrip_res4.ply in Resources */,
 				5514BAB2188E47850018CBFE /* drill_shaft_zip.ply in Resources */,
 				5514BA9A188B10580018CBFE /* InfoPlist.strings in Resources */,
 			);
