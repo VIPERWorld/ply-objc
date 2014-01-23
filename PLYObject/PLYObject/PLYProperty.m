@@ -209,7 +209,7 @@ NSString *const kPLYPropertyName = @"property";
  @param buffer the buffer to convert the double value into
  @return the byte length of the converted data
  */
-- (NSUInteger)convertFromDouble:(double)doubleValue toType:(NSString *)toType inBuffer:(uint8_t *)buffer
+- (NSUInteger)convertFromDouble:(double)doubleValue toType:(PLYDataType)toType inBuffer:(uint8_t *)buffer
 {
    
     switch (toType) {

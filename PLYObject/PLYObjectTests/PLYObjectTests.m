@@ -9,6 +9,7 @@
 #import <XCTest/XCTest.h>
 #import "PLYObject.h"
 #import "PLYElement.h"
+#import "OpenGL/gl3.h"
 
 @interface PLYObjectTests : XCTestCase
 
@@ -45,6 +46,7 @@
     // TODO: need more detailed checks of these elements
     
     PLYElement *nextElement = [[drillShaftObject elements] objectForKey:@"vertex"];
+    NSData *elementData = [nextElement data];
     
     XCTAssertNotNil(elementData, @"PLYObject provided unepected nil data for vertex element");
     XCTAssertEqual([elementData length], (NSUInteger)14096, @"vertex element data object was incorrect length");

@@ -12,7 +12,6 @@
 @implementation PLYElement
 {
     NSMutableArray *_properties;
-    NSData *_data;
 }
 
 - (id) init
@@ -161,7 +160,7 @@ NSString *const kPLYElementName = @"element";
     // add a non-nil object to the existing mutable array, or create
     // it if it does not yet exist
     if(newProperty) {
-        if(_properties == nil) {
+        if( _properties == nil ) {
             _properties = [NSMutableArray arrayWithObject:newProperty];
         } else {
             [_properties addObject:newProperty];
