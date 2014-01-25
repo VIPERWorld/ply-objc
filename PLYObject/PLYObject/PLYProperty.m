@@ -2,25 +2,11 @@
 //  PLYProperty.m
 //  PLYObject
 //
-//  Created by David Brown on 1/19/14.
 //  Copyright (c) 2014 David T. Brown. All rights reserved.
 //
 
 #import "PLYProperty.h"
 #import "OpenGL/gl3.h"
-
-typedef enum PLYDataTypeEnum {
-    PLYDataTypeInvalid = 0,
-    PLYDataTypeChar = 1,
-    PLYDataTypeUchar = 2,
-    PLYDataTypeShort = 3,
-    PLYDataTypeUshort = 4,
-    PLYDataTypeInt = 5,
-    PLYDataTypeUint = 6,
-    PLYDataTypeFloat = 7,
-    PLYDataTypeDouble = 8,
-    PLYDataTypeList = 9
-} PLYDataType;
 
 const NSUInteger kPLYDataTypeCount = (NSUInteger)PLYDataTypeList + 1;
 

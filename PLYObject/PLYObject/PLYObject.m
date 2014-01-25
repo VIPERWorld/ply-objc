@@ -2,7 +2,6 @@
 //  PLYObject.m
 //  PLYObject
 //
-//  Created by David Brown on 1/18/14.
 //  Copyright (c) 2014 David T. Brown. All rights reserved.
 //
 

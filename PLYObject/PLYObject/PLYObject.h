@@ -2,11 +2,12 @@
 //  PLYObject.h
 //  PLYObject
 //
-//  Created by David Brown on 1/18/14.
 //  Copyright (c) 2014 David T. Brown. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>
+
+@class PLYElement, PLYProperty;
 
 /**
  Class to represent a polygon object related to the PLY file format.
@@ -15,53 +16,81 @@
 @interface PLYObject : NSObject
 
 /**
- All of the comment fields in the file
+ An array of comment fields
  */
 @property (readwrite) NSArray *comments;
 
 /**
- All of the elements defined in the file
+ An array of element names
  */
-@property (readwrite) NSDictionary *elements;
+@property (readwrite) NSArray *elements;
 
 /**
  Reads a PLYObject from a .ply file
  @param url the url to read the .ply file from
- @return returns an error object if a problem occurred or nil if everythign was fine.
+ @param error an error object if a problem occurred
+ @return true if successful read occurred
  */
 - (BOOL)readFromURL:(NSURL *)url error:(NSError **)error;
+
+/**
+ Writes a PLYObject to a .ply file
+ @param url the url to write the .ply file to
+ @param error an error object if a problem occurred
+ @return true if successful read occured.
+ */
+- (BOOL)writeToURL:(NSURL *)url error:(NSError **)error;
+
+
 
 /**
  Obtain the binary data for the supplied element name
  @param elementName the name of the element
  @return data object for the element, or nil if data is not available
  */
-- (NSData *)dataForElementName:(NSString *)elementName;
+- (NSData *)dataForElement:(NSString *)elementName;
+
+/**
+ */
+// a property has a name, type, and is associated with an element
+// a list-type property has a name, count type, data type, and is associated with an element
+//
+// listProperty = [element addListProperty:propName countType:type dataType:type]
+// property = [element addProperty:propName dataType:type]
+//
+// [listProperty
+//
+// [element setData:meshData];
+// NSData *meshData = [element data];
+//
+// an element has a name, count
+//
+// element = [object addElement:elementName count:count];
+//
+//
+//
+
 
 
 /**
- Obtain an array of lengths (in bytes) for each property of the element
- name provided.
- @param elementName the name of the element
- @return array object with sizes in bytes for each property in the element
- in order of their appearance in the data set.
+ Add an element to the object
+ @param name the name of the element to add
+ @param count the number of elements to add
+ @return the element object, it is already added to the PLYObject
  */
-- (NSArray *)lengthsForElementName:(NSString *)elementName;
+- (PLYElement *)addElement:(NSString *)name count:(NSUInteger)count;
 
 /**
- Obtain an array of OpenGL type identifiers for each property in the element
- @param elementName the name of the element
- @return array object with the OpenGL type identifiers as values for each
- property in the element in order of their appearance in the data set.
+ Get an element object corresponding to the supplied name
+ @param name the name of the object to get
+ @return the element object in the PLYObject
  */
-- (NSArray *)glTypesForElementName:(NSString *)elementName;
+- (PLYElement *)getElement:(NSString *)name;
+
 
 /**
- Obtain an array of property names in the element
- @param elementName the name of the element
- @return array object with the property names for the element, in order of
- their appearance in the data set
  */
-- (NSArray *)propertyNamesForElementName:(NSString *)elementName;
+
+
 
 @end
