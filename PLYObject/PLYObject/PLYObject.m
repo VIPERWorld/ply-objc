@@ -129,7 +129,7 @@ const NSUInteger kPLYKeywordIndex = 0;
                 NSString *commentString = [_fileStringArray objectAtIndex:idx];
                 NSRange keywordRange = [commentString rangeOfString:kPLYCommentKeyword];
                 NSString *commentOnly = [commentString substringFromIndex:keywordRange.length];
-                [_comments addObject:commentOnly];
+                [self addComment:commentOnly];
 
             }];
             
@@ -197,7 +197,11 @@ const NSUInteger kPLYKeywordIndex = 0;
 
 - (void)addComment:(NSString *)commentString
 {
-    return;
+    if(_comments) {
+        [_comments addObject:commentString];
+    } else {
+        _comments = [NSMutableArray arrayWithObject:commentString];
+    }
 }
 
 - (PLYElement *)addElement:(NSString *)name count:(NSUInteger)count
@@ -207,7 +211,17 @@ const NSUInteger kPLYKeywordIndex = 0;
 
 - (PLYElement *)getElementWithName:(NSString *)name
 {
-    return nil;
+    PLYElement *nextElement = nil;
+    PLYElement *returnElement = nil;
+    
+    for(nextElement in _elements) {
+        if( [nextElement.name isEqualToString:name] ) {
+            returnElement = nextElement;
+            break;
+        }
+    }
+    
+    return returnElement;
 }
 
 

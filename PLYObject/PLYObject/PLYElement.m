@@ -58,10 +58,10 @@ NSString *const kPLYElementName = @"element";
     _data = nil;
     _elementString = nil;
     
-    if(_elementString) {
+    if(elementString) {
         
         // separate the element string into whitespace delimited fields
-        NSArray *elementFields = [_elementString componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        NSArray *elementFields = [elementString componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
 
         // check a set of constraints on the fields
         if( elementFields &&

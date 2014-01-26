@@ -22,8 +22,7 @@ typedef enum PLYDataTypeEnum {
     PLYDataTypeInt = 5,
     PLYDataTypeUint = 6,
     PLYDataTypeFloat = 7,
-    PLYDataTypeDouble = 8,
-    PLYDataTypeList = 9
+    PLYDataTypeDouble = 8
 } PLYDataType;
 
 @interface PLYProperty : NSObject

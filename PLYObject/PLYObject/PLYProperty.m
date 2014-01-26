@@ -58,10 +58,10 @@ NSString *const kPLYPropertyList = @"list";
     _countType = PLYDataTypeInvalid;
     _propertyType = PLYPropertyTypeInvalid;
 
-    if(_propertyString) {
+    if(propertyString) {
 
         // separate the property string into whitespace delimited fields
-        NSArray *propertyFields = [_propertyString componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
+        NSArray *propertyFields = [propertyString componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
         
         // check a set of constraints on the fields
         if( propertyFields &&
@@ -69,15 +69,12 @@ NSString *const kPLYPropertyList = @"list";
            ([propertyFields count] >= kPLYMinimumPropertyCount) ) {
             
             
-            PLYPropertyType propertyType = [self propertyTypeForString:
+            _propertyType = [self propertyTypeForString:
                                             [propertyFields objectAtIndex:kPLYPropertyTypeIndex]];
 
             _name = [propertyFields objectAtIndex:kPLYPropertyNameIndex];
             
-            if( propertyType == PLYDataTypeInvalid ) {
-                // issue!!
-                _propertyType = PLYPropertyTypeInvalid;
-            } else if( propertyType == PLYPropertyTypeList ) {
+            if( _propertyType == PLYPropertyTypeList ) {
                 
                 if( [propertyFields count] < kPLYMinimumPropertyListCount ) {
                     // issue
@@ -94,7 +91,7 @@ NSString *const kPLYPropertyList = @"list";
                     
                 }
                 
-            } else {
+            } else if( _propertyType == PLYPropertyTypeScalar ) {
                 
                 _dataType = [self dataTypeForString:
                              [propertyFields objectAtIndex:kPLYPropertyScalarTypeIndex]];
@@ -338,7 +335,6 @@ NSString *const kPLYPropertyList = @"list";
                                         @"uint": [NSNumber numberWithInt:PLYDataTypeUint],
                                         @"float": [NSNumber numberWithInt:PLYDataTypeFloat],
                                         @"double": [NSNumber numberWithInt:PLYDataTypeDouble],
-                                        @"list": [NSNumber numberWithInt:PLYDataTypeList],
                                         @"int8": [NSNumber numberWithInt:PLYDataTypeChar],
                                         @"uint8": [NSNumber numberWithInt:PLYDataTypeUchar],
                                         @"int16": [NSNumber numberWithInt:PLYDataTypeShort],
@@ -401,8 +397,8 @@ NSString *const kPLYPropertyList = @"list";
                                          @"int": [NSNumber numberWithInt:PLYPropertyTypeScalar],
                                          @"uint": [NSNumber numberWithInt:PLYPropertyTypeScalar],
                                          @"float": [NSNumber numberWithInt:PLYPropertyTypeScalar],
-                                         @"double": [NSNumber numberWithInt:PLYDataTypeDouble],
-                                         @"list": [NSNumber numberWithInt:PLYDataTypeList],
+                                         @"double": [NSNumber numberWithInt:PLYPropertyTypeScalar],
+                                         @"list": [NSNumber numberWithInt:PLYPropertyTypeList],
                                          @"int8": [NSNumber numberWithInt:PLYPropertyTypeScalar],
                                          @"uint8": [NSNumber numberWithInt:PLYPropertyTypeScalar],
                                          @"int16": [NSNumber numberWithInt:PLYPropertyTypeScalar],
