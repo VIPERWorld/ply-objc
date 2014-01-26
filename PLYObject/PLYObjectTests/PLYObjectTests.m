@@ -46,7 +46,7 @@ NSString *const kTVPropertyNames = @"propertyNames";
                                                                     kTVCommentCount: @0,
                                                                     kTVElementCount: @2,
                                                                     kTVElementNames: @[ @"vertex", @"face" ],
-                                                                    kTVElementDataLengths: @[ @14096, @15456 ],
+                                                                    kTVElementDataLengths: @[ @14096, @16744 ],
                                                                     kTVPropertyNames:
                                                                         @[ @[ @"x", @"y", @"z", @"confidence" ],
                                                                            @[ @"vertex_indices" ] ]
@@ -58,7 +58,7 @@ NSString *const kTVPropertyNames = @"propertyNames";
                                                                     kTVCommentCount: @1,
                                                                     kTVElementCount: @2,
                                                                     kTVElementNames: @[ @"vertex", @"face" ],
-                                                                    kTVElementDataLengths: @[ @62460, @133224 ],
+                                                                    kTVElementDataLengths: @[ @62460, @144326 ],
                                                                     kTVPropertyNames:
                                                                         @[ @[ @"x", @"y", @"z" ],
                                                                            @[ @"vertex_indices" ] ]
@@ -70,7 +70,7 @@ NSString *const kTVPropertyNames = @"propertyNames";
                                                                     kTVCommentCount: @0,
                                                                     kTVElementCount: @2,
                                                                     kTVElementNames: @[ @"vertex", @"face" ],
-                                                                    kTVElementDataLengths: @[ @16020, @29424 ],
+                                                                    kTVElementDataLengths: @[ @16020, @31876 ],
                                                                     kTVPropertyNames:
                                                                         @[ @[ @"x", @"y", @"z" ],
                                                                            @[ @"vertex_indices" ] ]
@@ -82,7 +82,7 @@ NSString *const kTVPropertyNames = @"propertyNames";
                                                                     kTVCommentCount: @0,
                                                                     kTVElementCount: @2,
                                                                     kTVElementNames: @[ @"vertex", @"face" ],
-                                                                    kTVElementDataLengths: @[ @62964, @125688 ],
+                                                                    kTVElementDataLengths: @[ @62964, @136162 ],
                                                                     kTVPropertyNames:
                                                                         @[ @[ @"x", @"y", @"z" ],
                                                                            @[ @"vertex_indices" ] ]
@@ -94,7 +94,7 @@ NSString *const kTVPropertyNames = @"propertyNames";
                                                                     kTVCommentCount: @1,
                                                                     kTVElementCount: @2,
                                                                     kTVElementNames: @[ @"vertex", @"face" ],
-                                                                    kTVElementDataLengths: @[ @240, @240 ],
+                                                                    kTVElementDataLengths: @[ @240, @252 ],
                                                                     kTVPropertyNames:
                                                                         @[ @[ @"x", @"y", @"z" ],
                                                                            @[ @"vertex_indices" ] ]
@@ -106,7 +106,7 @@ NSString *const kTVPropertyNames = @"propertyNames";
                                                                     kTVCommentCount: @2,
                                                                     kTVElementCount: @3,
                                                                     kTVElementNames: @[ @"vertex", @"face", @"edge" ],
-                                                                    kTVElementDataLengths: @[ @120, @104, @55  ],
+                                                                    kTVElementDataLengths: @[ @120, @111, @55  ],
                                                                     kTVPropertyNames:
                                                                         @[ @[ @"x", @"y", @"z", @"red", @"green", @"blue" ],
                                                                            @[ @"vertex_index" ],

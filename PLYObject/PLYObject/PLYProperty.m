@@ -217,15 +217,19 @@ NSString *const kPLYPropertyList = @"list";
         if( _propertyType == PLYPropertyTypeList ) {
             
             // list properties contain a count followed by the data values
-            NSInteger listCount;
             NSUInteger idx, readBytes;
             double scanDouble;
+            NSInteger listCount;
             uint8_t *bp = buffer;
             
             // scan in the list count
             //      TODO:   either keep list count or check that all list counts for a
             //              given property are consistent
-            [lineScanner scanInteger:&listCount];
+            [lineScanner scanDouble:&scanDouble];
+            readBytes = [self convertFromDouble:scanDouble toType:_countType inBuffer:bp];
+            bp += readBytes;
+            totalReadBytes += readBytes;
+            listCount = (NSUInteger)scanDouble;
             
             // for each data item that follows, scan it in as a double, and then cast it
             // to the appropriate data type and store it in the buffer
