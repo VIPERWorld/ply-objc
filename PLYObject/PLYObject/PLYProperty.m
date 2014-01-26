@@ -18,137 +18,109 @@
     NSString *_propertyString;
 }
 
-#pragma mark Init Methods
-
-- (id)init
-{
-    return [self initWithPropertyString:nil];
-}
-
-- (id)initWithPropertyString:(NSString *)string
-{
-    self = [super init];
-
-    if( self ) {
-        [self setPropertyString:string];
-    }
-    
-    return self;
-}
-
 #pragma mark Accessor Methods
 
-const NSUInteger kPLYMinimumPropertyCount = 3;
-const NSUInteger kPLYMinimumPropertyListCount = 5;
+static const NSUInteger kPLYMinimumPropertyCount = 3;
+static const NSUInteger kPLYMinimumPropertyListCount = 5;
 
-const NSUInteger kPLYPropertyFieldIndex = 0;
-const NSUInteger kPLYPropertyTypeIndex = 1;
-const NSUInteger kPLYPropertyScalarTypeIndex = 1;
-const NSUInteger kPLYPropertyListCountTypeIndex = 2;
-const NSUInteger kPLYPropertyListDataTypeIndex = 3;
-const NSUInteger kPLYPropertyListNameIndex = 4;
-const NSUInteger kPLYPropertyNameIndex = 2;
+static const NSUInteger kPLYPropertyFieldIndex = 0;
+static const NSUInteger kPLYPropertyTypeIndex = 1;
+static const NSUInteger kPLYPropertyScalarTypeIndex = 1;
+static const NSUInteger kPLYPropertyListCountTypeIndex = 2;
+static const NSUInteger kPLYPropertyListDataTypeIndex = 3;
+static const NSUInteger kPLYPropertyListNameIndex = 4;
+static const NSUInteger kPLYPropertyNameIndex = 2;
 
-NSString *const kPLYPropertyName = @"property";
-NSString *const kPLYPropertyList = @"list";
+static NSString *const kPLYPropertyName = @"property";
+static NSString *const kPLYPropertyList = @"list";
 
 - (void)setPropertyString:(NSString *)propertyString
 {
     _dataType = PLYDataTypeInvalid;
     _countType = PLYDataTypeInvalid;
     _propertyType = PLYPropertyTypeInvalid;
+    _propertyString = nil;
 
-    if(propertyString) {
-
-        // separate the property string into whitespace delimited fields
-        NSArray *propertyFields = [propertyString componentsSeparatedByCharactersInSet:[NSCharacterSet whitespaceAndNewlineCharacterSet]];
-        
-        // check a set of constraints on the fields
-        if( propertyFields &&
-           [[propertyFields objectAtIndex:kPLYPropertyFieldIndex] isEqualToString:kPLYPropertyName] &&
-           ([propertyFields count] >= kPLYMinimumPropertyCount) ) {
-            
-            
-            _propertyType = [self propertyTypeForString:
-                                            [propertyFields objectAtIndex:kPLYPropertyTypeIndex]];
-
-            _name = [propertyFields objectAtIndex:kPLYPropertyNameIndex];
-            
-            if( _propertyType == PLYPropertyTypeList ) {
-                
-                if( [propertyFields count] < kPLYMinimumPropertyListCount ) {
-                    // issue
-                    _propertyType = PLYPropertyTypeInvalid;
-                } else {
-                    
-                    _name = [propertyFields objectAtIndex:kPLYPropertyListNameIndex];
-                    
-                    NSString *dataTypeString = [propertyFields objectAtIndex:kPLYPropertyListDataTypeIndex];
-                    _dataType = [self dataTypeForString:dataTypeString];
-                    
-                    NSString *countTypeString = [propertyFields objectAtIndex:kPLYPropertyListCountTypeIndex];
-                    _countType = [self dataTypeForString:countTypeString];
-                    
-                }
-                
-            } else if( _propertyType == PLYPropertyTypeScalar ) {
-                
-                _dataType = [self dataTypeForString:
-                             [propertyFields objectAtIndex:kPLYPropertyScalarTypeIndex]];
-                
-                _countType = PLYDataTypeInvalid;
-            }
-            
-        } else {
-            // issue!! something wrong with field array,
-            _propertyType = PLYPropertyTypeInvalid;
-        }
-
+    if(!propertyString) {
+        return;
     }
     
-    if( _propertyType == PLYPropertyTypeInvalid ) {
-        _propertyString = nil;
-    } else {
+    // separate the property string into whitespace delimited fields
+    NSArray *propertyFields = [propertyString componentsSeparatedByCharactersInSet:
+                               [NSCharacterSet whitespaceAndNewlineCharacterSet]];
+    
+    if( !propertyFields ||
+       ![[propertyFields objectAtIndex:kPLYPropertyFieldIndex] isEqualToString:kPLYPropertyName] ||
+       ([propertyFields count] < kPLYMinimumPropertyCount) ) {
+        return;
+    }
+    
+    _propertyType = [self propertyTypeForString:
+                     [propertyFields objectAtIndex:kPLYPropertyTypeIndex]];
+
+    if( _propertyType == PLYPropertyTypeList &&
+       [propertyFields count] < kPLYMinimumPropertyListCount ) {
+        _propertyType = PLYPropertyTypeInvalid;
+        return;
+    }
+    
+    if( _propertyType == PLYPropertyTypeList ) {
+        
+        _name = [propertyFields objectAtIndex:kPLYPropertyListNameIndex];
+        
+        NSString *dataTypeString = [propertyFields objectAtIndex:kPLYPropertyListDataTypeIndex];
+        _dataType = [self dataTypeForString:dataTypeString];
+        
+        NSString *countTypeString = [propertyFields objectAtIndex:kPLYPropertyListCountTypeIndex];
+        _countType = [self dataTypeForString:countTypeString];
+        
+        _propertyString = propertyString;
+        
+    } else if( _propertyType == PLYPropertyTypeScalar ) {
+        
+        _name = [propertyFields objectAtIndex:kPLYPropertyNameIndex];
+
+        NSString *dataTypeString = [propertyFields objectAtIndex:kPLYPropertyScalarTypeIndex];
+        _dataType = [self dataTypeForString:dataTypeString];
+        
+        _countType = PLYDataTypeInvalid;
+        
         _propertyString = propertyString;
     }
-    
 }
 
 - (NSString *) propertyString
 {
-    NSString *returnString = nil;
-    
-    // construct a new string if an up-to-date string does not exist
-    if(_propertyString == nil) {
-        
-        if( _name == nil || _propertyType == PLYPropertyTypeInvalid || _dataType == PLYPropertyTypeInvalid ) {
-            returnString = nil;
-        } else if( _propertyType == PLYPropertyTypeList ) {
-            
-            if( _countType == PLYPropertyTypeInvalid ) {
-                returnString = nil;
-            } else {
-                returnString = [NSString stringWithFormat:@"%@ %@ %@ %@ %@",
-                                kPLYPropertyName, kPLYPropertyList,
-                                [self stringForDataType:_countType],
-                                [self stringForDataType:_dataType],
-                                _name];
-            }
-            
-        } else if( _propertyType == PLYPropertyTypeScalar ) {
-            
-            returnString = [NSString stringWithFormat:@"%@ %@ %@",
-                            kPLYPropertyName, _name,
-                            [self stringForDataType:_dataType]];
-            
-        } else {
-            returnString = nil;
-        }
-        
-        _propertyString = returnString;
-        
+    // custom setters ensure that _propertyString is nil if a property
+    // changes that would affect the property string value
+    if(_propertyString) {
+        return _propertyString;
     }
     
+    if( !_name || _propertyType == PLYPropertyTypeInvalid || _dataType == PLYPropertyTypeInvalid ) {
+        return nil;
+    }
+
+    if( _propertyType == PLYPropertyTypeList && _countType == PLYPropertyTypeInvalid ) {
+        return nil;
+    }
+    
+    if( _propertyType == PLYPropertyTypeList ) {
+            
+        _propertyString = [NSString stringWithFormat:@"%@ %@ %@ %@ %@",
+                           kPLYPropertyName, kPLYPropertyList,
+                           [self stringForDataType:_countType],
+                           [self stringForDataType:_dataType],
+                           _name];
+
+    } else if( _propertyType == PLYPropertyTypeScalar ) {
+        
+        _propertyString = [NSString stringWithFormat:@"%@ %@ %@",
+                           kPLYPropertyName, _name,
+                           [self stringForDataType:_dataType]];
+
+    }
+        
     return _propertyString;
 }
 
@@ -211,48 +183,43 @@ NSString *const kPLYPropertyList = @"list";
     NSUInteger totalReadBytes = 0;
     
     if( buffer == NULL || lineScanner == nil || _propertyType == PLYPropertyTypeInvalid) {
-        totalReadBytes = 0;
-    } else {
+        return totalReadBytes;
+    }
+    
+    if( _propertyType == PLYPropertyTypeList ) {
         
-        if( _propertyType == PLYPropertyTypeList ) {
-            
-            // list properties contain a count followed by the data values
-            NSUInteger idx, readBytes;
-            double scanDouble;
-            NSInteger listCount;
-            uint8_t *bp = buffer;
-            
-            // scan in the list count
-            //      TODO:   either keep list count or check that all list counts for a
-            //              given property are consistent
+        // list properties contain a count followed by the data values
+        NSUInteger idx, readBytes;
+        double scanDouble;
+        NSInteger listCount;
+        uint8_t *bp = buffer;
+        
+        // scan in the list count
+        [lineScanner scanDouble:&scanDouble];
+        readBytes = [self convertFromDouble:scanDouble toType:_countType inBuffer:bp];
+        bp += readBytes;
+        totalReadBytes += readBytes;
+        listCount = (NSUInteger)scanDouble;
+        
+        // for each data item that follows, scan it in as a double, and then cast it
+        // to the appropriate data type and store it in the buffer
+        for( idx=0; idx < listCount; idx++ ) {
             [lineScanner scanDouble:&scanDouble];
-            readBytes = [self convertFromDouble:scanDouble toType:_countType inBuffer:bp];
+            readBytes = [self convertFromDouble:scanDouble toType:_dataType inBuffer:bp];
             bp += readBytes;
             totalReadBytes += readBytes;
-            listCount = (NSUInteger)scanDouble;
-            
-            // for each data item that follows, scan it in as a double, and then cast it
-            // to the appropriate data type and store it in the buffer
-            for( idx=0; idx < listCount; idx++ ) {
-                [lineScanner scanDouble:&scanDouble];
-                readBytes = [self convertFromDouble:scanDouble toType:_dataType inBuffer:bp];
-                bp += readBytes;
-                totalReadBytes += readBytes;
-            }
-
-        } else if( _propertyType == PLYPropertyTypeScalar ) {
-            
-            double scanDouble;
-                
-            // scan in the value as a double, and then cast it to the appropriate type and
-            // add it to the memory buffer.
-            [lineScanner scanDouble:&scanDouble];
-                
-            totalReadBytes = [self convertFromDouble:scanDouble toType:_dataType inBuffer:buffer];
-                
-        } else {
-            totalReadBytes = 0;
         }
+
+    } else if( _propertyType == PLYPropertyTypeScalar ) {
+        
+        double scanDouble;
+            
+        // scan in the value as a double, and then cast it to the appropriate type and
+        // add it to the memory buffer.
+        [lineScanner scanDouble:&scanDouble];
+            
+        totalReadBytes = [self convertFromDouble:scanDouble toType:_dataType inBuffer:buffer];
+            
     }
     
     return totalReadBytes;

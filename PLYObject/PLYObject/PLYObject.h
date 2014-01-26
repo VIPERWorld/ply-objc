@@ -9,12 +9,11 @@
 
 @class PLYElement, PLYProperty;
 
-typedef enum PLYDataFormatEnum {
+typedef NS_ENUM(NSUInteger, PLYDataFormatType) {
     PLYDataFormatUTF8 = 0,
     PLYDataFormatBinaryBigEndian = 1,
     PLYDataFormatBinaryLittleEndian = 2
-} PLYDataFormatType;
-
+};
 
 /**
  Class to represent a polygon object related to the PLY file format.

@@ -7,13 +7,13 @@
 
 #import <Foundation/Foundation.h>
 
-typedef enum PLYPropertyTypeEnum {
+typedef NS_ENUM(NSUInteger, PLYPropertyType) {
     PLYPropertyTypeInvalid = 0,
     PLYPropertyTypeScalar = 1,
     PLYPropertyTypeList = 2
-} PLYPropertyType;
+};
 
-typedef enum PLYDataTypeEnum {
+typedef NS_ENUM(NSUInteger, PLYDataType) {
     PLYDataTypeInvalid = 0,
     PLYDataTypeChar = 1,
     PLYDataTypeUchar = 2,
@@ -23,7 +23,7 @@ typedef enum PLYDataTypeEnum {
     PLYDataTypeUint = 6,
     PLYDataTypeFloat = 7,
     PLYDataTypeDouble = 8
-} PLYDataType;
+};
 
 @interface PLYProperty : NSObject
 
@@ -52,13 +52,6 @@ typedef enum PLYDataTypeEnum {
  */
 @property (readwrite) NSString *propertyString;
 
-
-/**
- Configures the property
- @param string the property declaration string from a PLY file
- @return an object initialized with the supplied property string
- */
-- (id) initWithPropertyString:(NSString *)string;
 
 /**
  Scans the property using the provided scanner into a provided data buffer

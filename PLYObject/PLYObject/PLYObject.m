@@ -30,17 +30,6 @@ const NSUInteger kPLYKeywordIndex = 0;
      ordered, mutable collection of comments
      */
     NSMutableArray *_comments;
-    
-    /**
-     array of strings associated with this file
-     */
-    NSArray *_fileStringArray;
-    
-    /**
-     position in fileStringArray for next unread element data
-     */
-    NSUInteger _elementDataPosition;
-    
 }
 
 #pragma mark Accessor methods
@@ -69,122 +58,138 @@ const NSUInteger kPLYKeywordIndex = 0;
 
 - (BOOL)readFromURL:(NSURL *)url error:(NSError **)error
 {
-    BOOL success = YES;
+    NSArray *fileStringArray = nil;
     
     NSError *readError = nil;
     if( error != NULL )
         readError = *error;
     
-    if( url ) {
+    if( !url ) {
+        return NO;
+    }
+    
+    // load the strings
+    NSString *fileString = [NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:&readError];
+    fileStringArray = [fileString componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+    
+    // confirm ply-end_header bracketing, store element start position
+    NSIndexSet *plySet = [fileStringArray indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
+        *stop = [kPLYPlyKeyword isEqualToString:(NSString *)obj];
+        return *stop;
+    }];
+    
+    NSIndexSet *endHeaderSet = [fileStringArray indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
+        *stop = [kPLYEndHeaderKeyword isEqualToString:(NSString *)obj];
+        return *stop;
+    }];
+    
+    if( ([plySet count] != 1) || ([endHeaderSet count] != 1) ) {
+        // it's not a ply header if it has more or less than 1 ply/header pair
+        return NO;
+    }
+    
+    _elements = [[NSMutableArray alloc] init];
+    
+    NSInteger headerLength = [endHeaderSet firstIndex] - [plySet firstIndex];
+    
+    if( headerLength <= 0 ) {
+        return NO;
+    }
 
-        // load the strings
-        NSString *fileString = [NSString stringWithContentsOfURL:url encoding:NSUTF8StringEncoding error:&readError];
-        _fileStringArray = [fileString componentsSeparatedByCharactersInSet:[NSCharacterSet newlineCharacterSet]];
+    NSRange headerRange = NSMakeRange([plySet firstIndex], headerLength);
+    
+    NSIndexSet *headerIndexSet = [NSIndexSet indexSetWithIndexesInRange:headerRange];
+
+    NSIndexSet *commentSet = [fileStringArray indexesOfObjectsAtIndexes:headerIndexSet
+                                                                options:0
+                                                            passingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop)
+                              {
+                                  NSString *testString = (NSString *)obj;
+                                  NSRange resultRange = [testString rangeOfString:kPLYCommentKeyword];
+                                  return resultRange.location == 0;
+                              }];
+
+    NSIndexSet *elementSet = [fileStringArray indexesOfObjectsAtIndexes:headerIndexSet
+                                                                options:0
+                                                            passingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop)
+                              {
+                                  NSString *testString = (NSString *)obj;
+                                  NSRange resultRangeElement = [testString rangeOfString:kPLYElementKeyword];
+                                  NSRange resultRangeProperty = [testString rangeOfString:kPLYPropertyKeyword];
+                                  return (resultRangeElement.location == 0) || (resultRangeProperty.location == 0);
+                              }];
+
+    [commentSet enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
         
-        // confirm ply-end_header bracketing, store element start position
-        NSIndexSet *plySet = [_fileStringArray indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
-            *stop = [kPLYPlyKeyword isEqualToString:(NSString *)obj];
-            return *stop;
-        }];
+        // we already know each string starts with the comment keyword
+        // so no need to check for NSNotFound on keyword range
+        NSString *commentString = [fileStringArray objectAtIndex:idx];
+        NSRange keywordRange = [commentString rangeOfString:kPLYCommentKeyword];
+        NSString *commentOnly = [commentString substringFromIndex:keywordRange.length];
         
-        NSIndexSet *endHeaderSet = [_fileStringArray indexesOfObjectsPassingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop) {
-            *stop = [kPLYEndHeaderKeyword isEqualToString:(NSString *)obj];
-            return *stop;
-        }];
+        NSRange whitespaceRange = [commentOnly rangeOfCharacterFromSet:[NSCharacterSet whitespaceCharacterSet]];
         
-        if( ([plySet count] != 1) || ([endHeaderSet count] != 1) ) {
-            // it's not a ply header if it has more or less than 1 ply/header pair
-            success = NO;
-        } else {
-            
-            _elements = [[NSMutableArray alloc] init];
-            
-            NSRange headerRange = NSMakeRange([plySet firstIndex],[endHeaderSet firstIndex]);
-            
-            _elementDataPosition = [endHeaderSet firstIndex]+1;
-            
-            NSIndexSet *headerIndexSet = [NSIndexSet indexSetWithIndexesInRange:headerRange];
+        if( whitespaceRange.location != NSNotFound ) {
+            commentOnly = [commentOnly substringFromIndex:whitespaceRange.length];
+        }
+        
+        [self addComment:commentOnly];
 
-            NSIndexSet *commentSet = [_fileStringArray indexesOfObjectsAtIndexes:headerIndexSet
-                                                                        options:0
-                                                                    passingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop)
-                                      {
-                                          NSString *testString = (NSString *)obj;
-                                          NSRange resultRange = [testString rangeOfString:kPLYCommentKeyword];
-                                          return resultRange.location == 0;
-                                      }];
+    }];
+    
+    __block PLYElement *currentElement = nil;
+    
+    // go through all of the elements that were previously identified, process each,
+    // and add to the working dictionary
+    [elementSet enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
+        
+        NSString *fieldString = [fileStringArray objectAtIndex:idx];
+        
+        NSRange resultRangeElement = [fieldString rangeOfString:kPLYElementKeyword];
+        NSRange resultRangeProperty = [fieldString rangeOfString:kPLYPropertyKeyword];
 
-            NSIndexSet *elementSet = [_fileStringArray indexesOfObjectsAtIndexes:headerIndexSet
-                                                                        options:0
-                                                                    passingTest:^BOOL(id obj, NSUInteger idx, BOOL *stop)
-                                      {
-                                          NSString *testString = (NSString *)obj;
-                                          NSRange resultRangeElement = [testString rangeOfString:kPLYElementKeyword];
-                                          NSRange resultRangeProperty = [testString rangeOfString:kPLYPropertyKeyword];
-                                          return (resultRangeElement.location == 0) || (resultRangeProperty.location == 0);
-                                      }];
+        if( resultRangeElement.location == 0 ) {
 
-            [commentSet enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
-                
-                NSString *commentString = [_fileStringArray objectAtIndex:idx];
-                NSRange keywordRange = [commentString rangeOfString:kPLYCommentKeyword];
-                NSString *commentOnly = [commentString substringFromIndex:keywordRange.length];
-                [self addComment:commentOnly];
-
-            }];
-            
-            __block PLYElement *currentElement = nil;
-            
-            // go through all of the elements that were previously identified, process each,
-            // and add to the working dictionary
-            [elementSet enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
-                
-                NSString *fieldString = [_fileStringArray objectAtIndex:idx];
-                
-                NSRange resultRangeElement = [fieldString rangeOfString:kPLYElementKeyword];
-                NSRange resultRangeProperty = [fieldString rangeOfString:kPLYPropertyKeyword];
-
-                if( resultRangeElement.location == 0 ) {
-
-                    if( currentElement ) {
-                        [_elements addObject:currentElement];
-                        currentElement = nil;
-                    }
-                    
-                    currentElement = [[PLYElement alloc] initWithElementString:fieldString];
-                    
-                } else if( resultRangeProperty.location == 0 ) {
-                    
-                    if( currentElement ) {
-                        [currentElement addPropertyWithString:fieldString];
-                    }
-                }
-                
-            }];
-            
             if( currentElement ) {
                 [_elements addObject:currentElement];
                 currentElement = nil;
             }
             
-            // now we have the header data ready. now read some data using the _element
-            // ordered array, since the data section of the .ply file follows the same
-            // ordering as used in declaring the elements in the header
+            currentElement = [[PLYElement alloc] init];
+            currentElement.elementString = fieldString;
             
-            PLYElement *nextElement = nil;
-            NSUInteger readLines = 0;
+        } else if( resultRangeProperty.location == 0 ) {
             
-            for( nextElement in _elements ) {
-                
-                readLines = [nextElement readFromStrings:_fileStringArray startIndex:_elementDataPosition];
-                _elementDataPosition += readLines;
-                
+            if( currentElement ) {
+                [currentElement addPropertyWithString:fieldString];
             }
         }
         
+    }];
+    
+    
+    if( currentElement ) {
+        [_elements addObject:currentElement];
+        currentElement = nil;
     }
     
-    return success;
+    // now we have the header data ready. now read some data using the _element
+    // ordered array, since the data section of the .ply file follows the same
+    // ordering as used in declaring the elements in the header
+
+    NSUInteger filePosition = [endHeaderSet firstIndex]+1;
+
+    PLYElement *nextElement = nil;
+    NSUInteger readLines = 0;
+    
+    for( nextElement in _elements ) {
+        
+        readLines = [nextElement readFromStrings:fileStringArray startIndex:filePosition];
+        filePosition += readLines;
+        
+    }
+    
+    return YES;
 }
 
 - (BOOL)writeToURL:(NSURL *)url format:(PLYDataFormatType)format

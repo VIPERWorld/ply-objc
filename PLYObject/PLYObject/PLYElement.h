@@ -34,19 +34,12 @@
 /**
  The element string conforming to the PLY file specification
  */
-@property (readwrite) NSString *elementString;
+@property (readwrite, strong) NSString *elementString;
 
 /**
  The binary data for this element
  */
 @property (readwrite) NSData *data;
-
-/**
- Configures the element
- @param string the element declaration string from a PLY file
- @return an object initialized with the supplied element string
- */
-- (id) initWithElementString:(NSString *)string;
 
 /**
  Add a property described by the string to the element
