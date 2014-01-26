@@ -9,6 +9,13 @@
 
 @class PLYElement, PLYProperty;
 
+typedef enum PLYDataFormatEnum {
+    PLYDataFormatUTF8 = 0,
+    PLYDataFormatBinaryBigEndian = 1,
+    PLYDataFormatBinaryLittleEndian = 2
+} PLYDataFormatType;
+
+
 /**
  Class to represent a polygon object related to the PLY file format.
  @cite http://www.mathworks.com/matlabcentral/fx_files/5459/1/content/ply.htm 
@@ -21,7 +28,7 @@
 @property (readwrite) NSArray *comments;
 
 /**
- An array of element names
+ An array of element objects
  */
 @property (readwrite) NSArray *elements;
 
@@ -36,41 +43,18 @@
 /**
  Writes a PLYObject to a .ply file
  @param url the url to write the .ply file to
- @param error an error object if a problem occurred
+ @param format the format type to use for writing
  @return true if successful read occured.
  */
-- (BOOL)writeToURL:(NSURL *)url error:(NSError **)error;
-
+- (BOOL)writeToURL:(NSURL *)url format:(PLYDataFormatType)format;
 
 
 /**
- Obtain the binary data for the supplied element name
- @param elementName the name of the element
- @return data object for the element, or nil if data is not available
+ Add a comment to the objet
+ @param commentString the comment text to add
+ @return nothing
  */
-- (NSData *)dataForElement:(NSString *)elementName;
-
-/**
- */
-// a property has a name, type, and is associated with an element
-// a list-type property has a name, count type, data type, and is associated with an element
-//
-// listProperty = [element addListProperty:propName countType:type dataType:type]
-// property = [element addProperty:propName dataType:type]
-//
-// [listProperty
-//
-// [element setData:meshData];
-// NSData *meshData = [element data];
-//
-// an element has a name, count
-//
-// element = [object addElement:elementName count:count];
-//
-//
-//
-
-
+- (void)addComment:(NSString *)commentString;
 
 /**
  Add an element to the object
@@ -83,14 +67,8 @@
 /**
  Get an element object corresponding to the supplied name
  @param name the name of the object to get
- @return the element object in the PLYObject
+ @return the element object, or nil if it does not exist
  */
-- (PLYElement *)getElement:(NSString *)name;
-
-
-/**
- */
-
-
+- (PLYElement *)getElementWithName:(NSString *)name;
 
 @end

@@ -22,6 +22,16 @@ const NSUInteger kPLYKeywordIndex = 0;
 @implementation PLYObject
 {
     /**
+     ordered, mutable collection of element objects
+     */
+    NSMutableArray *_elements;
+    
+    /**
+     ordered, mutable collection of comments
+     */
+    NSMutableArray *_comments;
+    
+    /**
      array of strings associated with this file
      */
     NSArray *_fileStringArray;
@@ -31,12 +41,31 @@ const NSUInteger kPLYKeywordIndex = 0;
      */
     NSUInteger _elementDataPosition;
     
-    /**
-     ordered collection of element keys for enumeration during element data import
-     */
-    NSMutableArray *_elementNames;
-    
 }
+
+#pragma mark Accessor methods
+
+- (NSArray *)comments
+{
+    return _comments ? [NSArray arrayWithArray:_comments] : nil;
+}
+
+- (void)setComments:(NSArray *)comments
+{
+    _comments = comments ? [NSMutableArray arrayWithArray:comments] : nil;
+}
+
+- (NSArray *)elements
+{
+    return _elements ? [NSArray arrayWithArray:_elements] : nil;
+}
+
+- (void)setElements:(NSArray *)elements
+{
+    _elements = elements ? [NSMutableArray arrayWithArray:elements] : nil;
+}
+
+#pragma mark File I/O methods
 
 - (BOOL)readFromURL:(NSURL *)url error:(NSError **)error
 {
@@ -68,7 +97,7 @@ const NSUInteger kPLYKeywordIndex = 0;
             success = NO;
         } else {
             
-            _elementNames = [[NSMutableArray alloc] init];
+            _elements = [[NSMutableArray alloc] init];
             
             NSRange headerRange = NSMakeRange([plySet firstIndex],[endHeaderSet firstIndex]);
             
@@ -95,9 +124,14 @@ const NSUInteger kPLYKeywordIndex = 0;
                                           return (resultRangeElement.location == 0) || (resultRangeProperty.location == 0);
                                       }];
 
-            _comments = [_fileStringArray objectsAtIndexes:commentSet];
-            
-            NSMutableDictionary *elementWork = [[NSMutableDictionary alloc] init];
+            [commentSet enumerateIndexesUsingBlock:^(NSUInteger idx, BOOL *stop) {
+                
+                NSString *commentString = [_fileStringArray objectAtIndex:idx];
+                NSRange keywordRange = [commentString rangeOfString:kPLYCommentKeyword];
+                NSString *commentOnly = [commentString substringFromIndex:keywordRange.length];
+                [_comments addObject:commentOnly];
+
+            }];
             
             __block PLYElement *currentElement = nil;
             
@@ -113,8 +147,7 @@ const NSUInteger kPLYKeywordIndex = 0;
                 if( resultRangeElement.location == 0 ) {
 
                     if( currentElement ) {
-                        [elementWork setObject:currentElement forKey:[currentElement name]];
-                        [_elementNames addObject:[currentElement name]];
+                        [_elements addObject:currentElement];
                         currentElement = nil;
                     }
                     
@@ -130,26 +163,20 @@ const NSUInteger kPLYKeywordIndex = 0;
             }];
             
             if( currentElement ) {
-                [elementWork setObject:currentElement forKey:[currentElement name]];
-                [_elementNames addObject:[currentElement name]];
+                [_elements addObject:currentElement];
                 currentElement = nil;
             }
             
-            _elements = [NSDictionary dictionaryWithDictionary:elementWork];
-            elementWork = nil;
-            
-            // now we have the header data ready. let's read some data, use the ordered
-            // list of keys we generated when we read the header above, since the data
-            // section of the .ply file follows the same ordering as used in the header
+            // now we have the header data ready. now read some data using the _element
+            // ordered array, since the data section of the .ply file follows the same
+            // ordering as used in declaring the elements in the header
             
             PLYElement *nextElement = nil;
-            NSString *nextElementName = nil;
             NSUInteger readLines = 0;
             
-            for( nextElementName in _elementNames ) {
+            for( nextElement in _elements ) {
                 
-                nextElement = [_elements objectForKey:nextElementName];
-                readLines = [nextElement readFromStrings:_fileStringArray startPosition:_elementDataPosition];
+                readLines = [nextElement readFromStrings:_fileStringArray startIndex:_elementDataPosition];
                 _elementDataPosition += readLines;
                 
             }
@@ -160,55 +187,29 @@ const NSUInteger kPLYKeywordIndex = 0;
     return success;
 }
 
-- (NSData *)dataForElementName:(NSString *)elementName
+- (BOOL)writeToURL:(NSURL *)url format:(PLYDataFormatType)format
 {
-    return [(PLYElement *)[_elements objectForKey:elementName] data];
+    return NO;
 }
 
-- (NSArray *)lengthsForElementName:(NSString *)elementName
-{
-    NSArray *lengths = nil;
-    
-    PLYElement *theElement = [_elements objectForKey:elementName];
 
-    if( theElement ) {
-        lengths = [theElement elementLengths];
-        if( [lengths count] == 0 ) lengths = nil;
-    }
-    
-    // convert it to an array but only if there is data for it
-    return lengths;
+#pragma mark Incremental addition methods
+
+- (void)addComment:(NSString *)commentString
+{
+    return;
 }
 
-- (NSArray *)glTypesForElementName:(NSString *)elementName
+- (PLYElement *)addElement:(NSString *)name count:(NSUInteger)count
 {
-    NSArray *GLtypes = nil;
-    
-    PLYElement *theElement = [_elements objectForKey:elementName];
-    
-    if( theElement ) {
-        GLtypes = [theElement dataGLTypes];
-        if( [GLtypes count] == 0 ) GLtypes = nil;
-    }
-    
-    // convert it to an array but only if there is data for it
-    return GLtypes;
+    return nil;
 }
 
-- (NSArray *)propertyNamesForElementName:(NSString *)elementName
+- (PLYElement *)getElementWithName:(NSString *)name
 {
-    NSArray *propertyNames = nil;
-    
-    PLYElement *theElement = [_elements objectForKey:elementName];
-    
-    if( theElement ) {
-        propertyNames = [theElement propertyNames];
-        if( [propertyNames count] == 0 ) propertyNames = nil;
-        
-    }
-    
-    // convert it to an array but only if there is data for it
-    return propertyNames;
+    return nil;
 }
+
+
 
 @end
