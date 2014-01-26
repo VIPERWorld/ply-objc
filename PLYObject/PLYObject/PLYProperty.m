@@ -6,26 +6,19 @@
 //
 
 #import "PLYProperty.h"
-#import "OpenGL/gl3.h"
-
-const NSUInteger kPLYDataTypeCount = (NSUInteger)PLYDataTypeList + 1;
-
-NSUInteger kPLYBytesForDataType[kPLYDataTypeCount] = { 0, 1, 1, 2, 2, 4, 4, 4, 8, 0 };
-
-GLenum kPLYGlTypeForDataType[kPLYDataTypeCount] =
-{
-    0, GL_BYTE, GL_UNSIGNED_BYTE, GL_SHORT, GL_UNSIGNED_SHORT,
-    GL_INT, GL_UNSIGNED_INT, GL_FLOAT, GL_DOUBLE, 0
-};
 
 @implementation PLYProperty
 {
+    NSString *_name;
+    PLYPropertyType _propertyType;
+    
     PLYDataType _dataType;
     PLYDataType _countType;
     
-    NSString *_dataTypeString;
-    NSString *_countTypeString;
+    NSString *_propertyString;
 }
+
+#pragma mark Init Methods
 
 - (id)init
 {
@@ -43,29 +36,28 @@ GLenum kPLYGlTypeForDataType[kPLYDataTypeCount] =
     return self;
 }
 
+#pragma mark Accessor Methods
+
 const NSUInteger kPLYMinimumPropertyCount = 3;
 const NSUInteger kPLYMinimumPropertyListCount = 5;
 
 const NSUInteger kPLYPropertyFieldIndex = 0;
 const NSUInteger kPLYPropertyTypeIndex = 1;
+const NSUInteger kPLYPropertyScalarTypeIndex = 1;
 const NSUInteger kPLYPropertyListCountTypeIndex = 2;
 const NSUInteger kPLYPropertyListDataTypeIndex = 3;
 const NSUInteger kPLYPropertyListNameIndex = 4;
 const NSUInteger kPLYPropertyNameIndex = 2;
 
 NSString *const kPLYPropertyName = @"property";
+NSString *const kPLYPropertyList = @"list";
 
 - (void)setPropertyString:(NSString *)propertyString
 {
-    _propertyString = propertyString;
-    
     _dataType = PLYDataTypeInvalid;
     _countType = PLYDataTypeInvalid;
-    _dataTypeString = nil;
-    _countTypeString = nil;
-    
-    _list = NO;
-    
+    _propertyType = PLYPropertyTypeInvalid;
+
     if(_propertyString) {
 
         // separate the property string into whitespace delimited fields
@@ -77,80 +69,155 @@ NSString *const kPLYPropertyName = @"property";
            ([propertyFields count] >= kPLYMinimumPropertyCount) ) {
             
             
-            PLYDataType propertyType = [self dataTypeForPropertyString:[propertyFields objectAtIndex:kPLYPropertyTypeIndex]];
+            PLYPropertyType propertyType = [self propertyTypeForString:
+                                            [propertyFields objectAtIndex:kPLYPropertyTypeIndex]];
 
-            _list = (propertyType == PLYDataTypeList);
             _name = [propertyFields objectAtIndex:kPLYPropertyNameIndex];
             
             if( propertyType == PLYDataTypeInvalid ) {
                 // issue!!
-            } else if( propertyType == PLYDataTypeList ) {
+                _propertyType = PLYPropertyTypeInvalid;
+            } else if( propertyType == PLYPropertyTypeList ) {
                 
                 if( [propertyFields count] < kPLYMinimumPropertyListCount ) {
                     // issue
+                    _propertyType = PLYPropertyTypeInvalid;
                 } else {
                     
                     _name = [propertyFields objectAtIndex:kPLYPropertyListNameIndex];
                     
-                    _dataTypeString = [propertyFields objectAtIndex:kPLYPropertyListDataTypeIndex];
-                    _dataType = [self dataTypeForPropertyString:_dataTypeString];
+                    NSString *dataTypeString = [propertyFields objectAtIndex:kPLYPropertyListDataTypeIndex];
+                    _dataType = [self dataTypeForString:dataTypeString];
                     
-                    _countTypeString = [propertyFields objectAtIndex:kPLYPropertyListCountTypeIndex];
-                    _countType = [self dataTypeForPropertyString:_countTypeString];
+                    NSString *countTypeString = [propertyFields objectAtIndex:kPLYPropertyListCountTypeIndex];
+                    _countType = [self dataTypeForString:countTypeString];
                     
                 }
                 
             } else {
-                _dataTypeString = [propertyFields objectAtIndex:kPLYPropertyTypeIndex];
-                _dataType = propertyType;
                 
-                _countTypeString = nil;
+                _dataType = [self dataTypeForString:
+                             [propertyFields objectAtIndex:kPLYPropertyScalarTypeIndex]];
+                
                 _countType = PLYDataTypeInvalid;
             }
             
         } else {
             // issue!! something wrong with field array,
+            _propertyType = PLYPropertyTypeInvalid;
         }
 
+    }
+    
+    if( _propertyType == PLYPropertyTypeInvalid ) {
+        _propertyString = nil;
+    } else {
+        _propertyString = propertyString;
     }
     
 }
 
 - (NSString *) propertyString
 {
+    NSString *returnString = nil;
+    
+    // construct a new string if an up-to-date string does not exist
+    if(_propertyString == nil) {
+        
+        if( _name == nil || _propertyType == PLYPropertyTypeInvalid || _dataType == PLYPropertyTypeInvalid ) {
+            returnString = nil;
+        } else if( _propertyType == PLYPropertyTypeList ) {
+            
+            if( _countType == PLYPropertyTypeInvalid ) {
+                returnString = nil;
+            } else {
+                returnString = [NSString stringWithFormat:@"%@ %@ %@ %@ %@",
+                                kPLYPropertyName, kPLYPropertyList,
+                                [self stringForDataType:_countType],
+                                [self stringForDataType:_dataType],
+                                _name];
+            }
+            
+        } else if( _propertyType == PLYPropertyTypeScalar ) {
+            
+            returnString = [NSString stringWithFormat:@"%@ %@ %@",
+                            kPLYPropertyName, _name,
+                            [self stringForDataType:_dataType]];
+            
+        } else {
+            returnString = nil;
+        }
+        
+        _propertyString = returnString;
+        
+    }
+    
     return _propertyString;
 }
 
-- (NSUInteger) dataLength
+- (NSString *)name
 {
-    return kPLYBytesForDataType[(NSUInteger)_dataType];
+    return _name;
 }
 
-- (NSUInteger) countLength
+- (void)setName:(NSString *)name
 {
-    return kPLYBytesForDataType[(NSUInteger)_countType];
+    _name = name;
+    
+    // setting a property field explicitly requires the string value to be regenerated
+    _propertyString = nil;
 }
 
-- (GLenum) dataGLType
+- (PLYPropertyType) propertyType
 {
-    return kPLYGlTypeForDataType[(NSUInteger)_dataType];
+    return _propertyType;
 }
 
-- (GLenum) countGLType
+- (void)setPropertyType:(PLYPropertyType)propertyType
 {
-    return kPLYGlTypeForDataType[(NSUInteger)_countType];
+    _propertyType = propertyType;
+    
+    // setting a property field explicitly requires the string value to be regenerated
+    _propertyString = nil;
 }
 
+- (PLYDataType)countType
+{
+    return _countType;
+}
+
+- (void)setCountType:(PLYDataType)countType
+{
+    _countType = countType;
+    
+    // setting a property field explicitly requires the string value to be regenerated
+    _propertyString = nil;
+}
+
+- (PLYDataType)dataType
+{
+    return _dataType;
+}
+
+- (void)setDataType:(PLYDataType)dataType
+{
+    _dataType = dataType;
+    
+    // setting a property field explicitly requires the string value to be regenerated
+    _propertyString = nil;
+}
+
+#pragma mark Data conversion methods
 
 - (NSUInteger)scanPropertyIntoBuffer:(uint8_t *)buffer usingScanner:(NSScanner *)lineScanner {
     
     NSUInteger totalReadBytes = 0;
     
-    if( buffer == NULL || lineScanner == nil || _dataType == PLYDataTypeInvalid) {
+    if( buffer == NULL || lineScanner == nil || _propertyType == PLYPropertyTypeInvalid) {
         totalReadBytes = 0;
     } else {
         
-        if( _list ) {
+        if( _propertyType == PLYPropertyTypeList ) {
             
             // list properties contain a count followed by the data values
             NSInteger listCount;
@@ -172,7 +239,7 @@ NSString *const kPLYPropertyName = @"property";
                 totalReadBytes += readBytes;
             }
 
-        } else {
+        } else if( _propertyType == PLYPropertyTypeScalar ) {
             
             double scanDouble;
                 
@@ -182,6 +249,8 @@ NSString *const kPLYPropertyName = @"property";
                 
             totalReadBytes = [self convertFromDouble:scanDouble toType:_dataType inBuffer:buffer];
                 
+        } else {
+            totalReadBytes = 0;
         }
     }
     
@@ -199,54 +268,64 @@ NSString *const kPLYPropertyName = @"property";
  */
 - (NSUInteger)convertFromDouble:(double)doubleValue toType:(PLYDataType)toType inBuffer:(uint8_t *)buffer
 {
-   
+    NSUInteger readBytes = 0;
+    
     switch (toType) {
         case PLYDataTypeChar:
             *(int8_t *)buffer = (int8_t)doubleValue;
+            readBytes = sizeof(int8_t);
             break;
             
         case PLYDataTypeUchar:
             *(uint8_t *)buffer = (uint8_t)doubleValue;
+            readBytes = sizeof(uint8_t);
             break;
             
         case PLYDataTypeShort:
             *(int16_t *)buffer = (int16_t)doubleValue;
+            readBytes = sizeof(int16_t);
             break;
             
         case PLYDataTypeUshort:
             *(uint16_t *)buffer = (uint16_t)doubleValue;
+            readBytes = sizeof(uint16_t);
             break;
             
         case PLYDataTypeInt:
             *(int32_t *)buffer = (int32_t)doubleValue;
+            readBytes = sizeof(int32_t);
             break;
             
         case PLYDataTypeUint:
             *(uint32_t *)buffer = (uint32_t)doubleValue;
+            readBytes = sizeof(uint32_t);
             break;
             
         case PLYDataTypeFloat:
             *(float *)buffer = (float)doubleValue;
+            readBytes = sizeof(float);
             break;
             
         case PLYDataTypeDouble:
             *(double *)buffer = doubleValue;
+            readBytes = sizeof(double);
             break;
             
         default:
+            readBytes = 0;
             break;
     }
     
-    return kPLYBytesForDataType[toType];
+    return readBytes;
 }
 
 /**
- Converts a property string into an enumerated data value
- @param propertyString the string to convert
- @return the property type corresponding to the text string, PLYDataTypeInvalid if
+ Converts a type string into an enumerated data type
+ @param typeString the string to convert
+ @return the data type corresponding to the text string, PLYDataTypeInvalid if
  it is not recognized.
  */
-- (PLYDataType)dataTypeForPropertyString:(NSString *)propertyString {
+- (PLYDataType)dataTypeForString:(NSString *)typeString {
     
     PLYDataType dataType = PLYDataTypeInvalid;
     
@@ -270,7 +349,7 @@ NSString *const kPLYPropertyName = @"property";
                                         @"float64": [NSNumber numberWithInt:PLYDataTypeDouble]
                                         };
 
-    NSNumber *numberForDataType = [plyEnumForDataType objectForKey:propertyString];
+    NSNumber *numberForDataType = [plyEnumForDataType objectForKey:typeString];
     
     if( numberForDataType ) {
         dataType = (PLYDataType)[numberForDataType intValue];
@@ -280,5 +359,70 @@ NSString *const kPLYPropertyName = @"property";
     
     return dataType;
 }
+
+/**
+ Converts an enumerated data type into a type string
+ @param dataType the type to convert
+ @return a string containing the text corresponding to that data type
+ */
+- (NSString *)stringForDataType:(PLYDataType)dataType
+{
+    NSDictionary *plyEnumForDataType = @{
+                                         [NSNumber numberWithInt:PLYDataTypeChar]: @"int8",
+                                         [NSNumber numberWithInt:PLYDataTypeUchar]: @"uint8",
+                                         [NSNumber numberWithInt:PLYDataTypeShort]: @"int16",
+                                         [NSNumber numberWithInt:PLYDataTypeUshort]: @"uint16",
+                                         [NSNumber numberWithInt:PLYDataTypeInt]: @"int32",
+                                         [NSNumber numberWithInt:PLYDataTypeUint]: @"uint32",
+                                         [NSNumber numberWithInt:PLYDataTypeFloat]: @"float32",
+                                         [NSNumber numberWithInt:PLYDataTypeDouble]: @"float64"
+                                         };
+    
+    NSString *returnString = [plyEnumForDataType objectForKey:[NSNumber numberWithInt:dataType]];
+    
+    return returnString;
+}
+
+/**
+ Converts a type string into an enumerated property type
+ @param typeString the string to convert
+ @return the property type corresponding to the text string, PLYPropertyTypeInvalid if
+ it is not recognized.
+ */
+- (PLYPropertyType)propertyTypeForString:(NSString *)typeString {
+    
+    PLYPropertyType dataType = PLYPropertyTypeInvalid;
+    
+    NSDictionary *plyEnumForDataType = @{
+                                         @"char": [NSNumber numberWithInt:PLYPropertyTypeScalar],
+                                         @"uchar": [NSNumber numberWithInt:PLYPropertyTypeScalar],
+                                         @"short": [NSNumber numberWithInt:PLYPropertyTypeScalar],
+                                         @"ushort": [NSNumber numberWithInt:PLYPropertyTypeScalar],
+                                         @"int": [NSNumber numberWithInt:PLYPropertyTypeScalar],
+                                         @"uint": [NSNumber numberWithInt:PLYPropertyTypeScalar],
+                                         @"float": [NSNumber numberWithInt:PLYPropertyTypeScalar],
+                                         @"double": [NSNumber numberWithInt:PLYDataTypeDouble],
+                                         @"list": [NSNumber numberWithInt:PLYDataTypeList],
+                                         @"int8": [NSNumber numberWithInt:PLYPropertyTypeScalar],
+                                         @"uint8": [NSNumber numberWithInt:PLYPropertyTypeScalar],
+                                         @"int16": [NSNumber numberWithInt:PLYPropertyTypeScalar],
+                                         @"uint16": [NSNumber numberWithInt:PLYPropertyTypeScalar],
+                                         @"int32": [NSNumber numberWithInt:PLYPropertyTypeScalar],
+                                         @"uint32": [NSNumber numberWithInt:PLYPropertyTypeScalar],
+                                         @"float32": [NSNumber numberWithInt:PLYPropertyTypeScalar],
+                                         @"float64": [NSNumber numberWithInt:PLYPropertyTypeScalar]
+                                         };
+    
+    NSNumber *numberForDataType = [plyEnumForDataType objectForKey:typeString];
+    
+    if( numberForDataType ) {
+        dataType = (PLYPropertyType)[numberForDataType intValue];
+    } else {
+        dataType = PLYPropertyTypeInvalid;
+    }
+    
+    return dataType;
+}
+
 
 @end

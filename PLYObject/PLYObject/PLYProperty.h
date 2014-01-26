@@ -31,7 +31,7 @@ typedef enum PLYDataTypeEnum {
 /**
  The string value of the property name
  */
-@property (readonly) NSString *name;
+@property (readwrite) NSString *name;
 
 /**
  The property type
