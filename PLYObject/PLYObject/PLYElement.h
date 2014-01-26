@@ -23,7 +23,7 @@
 /**
  The number of these elements in the PLY file
  */
-@property (readonly) NSUInteger count;
+@property (readwrite) NSUInteger count;
 
 /**
  An array of properties for this element ordered by their appearance
@@ -39,12 +39,7 @@
 /**
  The binary data for this element
  */
-@property (readonly) NSData *data;
-
-/**
- The property names for this element.
- */
-@property (readonly) NSArray *propertyNames;
+@property (readwrite) NSData *data;
 
 /**
  Configures the element
@@ -73,6 +68,6 @@
  @param start the starting string position
  @return number of lines read for this element
  */
-- (NSUInteger)readFromStrings:(NSArray *)strings startPosition:(NSUInteger)start;
+- (NSUInteger)readFromStrings:(NSArray *)strings startIndex:(NSUInteger)start;
 
 @end

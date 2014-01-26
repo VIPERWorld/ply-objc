@@ -11,8 +11,17 @@
 
 @implementation PLYElement
 {
+    NSString *_name;
+    NSUInteger _count;
+
     NSMutableArray *_properties;
+    
+    NSString *_elementString;
+    
+    NSMutableData *_data;
 }
+
+#pragma mark Init methods
 
 - (id) init
 {
@@ -31,6 +40,8 @@
     return self;
 }
 
+#pragma mark Accessor methods
+
 const NSUInteger kPLYMinimumElementCount = 3;
 
 const NSUInteger kPLYElementFieldIndex = 0;
@@ -41,12 +52,11 @@ NSString *const kPLYElementName = @"element";
 
 - (void)setElementString:(NSString *)elementString
 {
-    _elementString = elementString;
-    
     _count = 0;
     _name = nil;
     _properties = nil;
     _data = nil;
+    _elementString = nil;
     
     if(_elementString) {
         
@@ -62,6 +72,9 @@ NSString *const kPLYElementName = @"element";
             NSString *elementCount = [elementFields objectAtIndex:kPLYElementCountIndex];
             if(elementCount)
                 _count = (NSUInteger)[elementCount integerValue];
+            
+            _elementString = elementString;
+            
         } else {
             // issue!!
         }
@@ -74,7 +87,50 @@ NSString *const kPLYElementName = @"element";
 
 - (NSString *)elementString
 {
+    NSString *returnString = nil;
+    
+    // construct a new string if an up-to-date string does not exist
+    if( _elementString == nil ) {
+        
+        if( _name == nil || _count == 0 ) {
+            returnString = nil;
+        } else {
+            
+            returnString = [NSString stringWithFormat:@"%@ %@ %ld",kPLYElementName,
+                            _name, _count];
+        }
+        
+        _elementString = returnString;
+    }
+    
     return _elementString;
+}
+
+
+- (NSString *)name
+{
+    return _name;
+}
+
+- (void)setName:(NSString *)name
+{
+    _name = name;
+    
+    // setting an element field explicitly requires the string value to be regenerated
+    _elementString = nil;
+}
+
+- (NSUInteger)count
+{
+    return _count;
+}
+
+- (void)setCount:(NSUInteger)count
+{
+    _count = count;
+    
+    // setting an element field explicitly requires the string value to be regenerated
+    _elementString = nil;
 }
 
 - (NSArray *)properties
@@ -82,95 +138,29 @@ NSString *const kPLYElementName = @"element";
     return [NSArray arrayWithArray:_properties];
 }
 
-
-- (BOOL) isList
-{
-    BOOL list = NO;
-    if( [_properties count] == 1 ) {
-        list = [[_properties objectAtIndex:0] isList];
-    }
-    return list;
-}
-
-
-- (NSArray *)elementLengths
-{
-    NSArray *returnArray = nil;
-    
-    if( [_properties count] > 0 ) {
-        NSMutableArray *lengths = [[NSMutableArray alloc] init];
-        PLYProperty *nextProperty = nil;
-        for( nextProperty in _properties ) {
-            if( [nextProperty isList] ) {
-                [lengths addObject:[NSNumber numberWithUnsignedInteger:[nextProperty countLength]]];
-                [lengths addObject:[NSNumber numberWithUnsignedInteger:[nextProperty dataLength]]];
-            } else {
-                [lengths addObject:[NSNumber numberWithUnsignedInteger:[nextProperty dataLength]]];
-            }
-        }
-        returnArray = [NSArray arrayWithArray:lengths];
-    }
-    
-    return returnArray;
-}
-
-
-- (NSArray *)dataGLTypes
-{
-    NSArray *returnArray = nil;
-    
-    if( [_properties count] > 0 ) {
-        NSMutableArray *glTypes = [[NSMutableArray alloc] init];
-        PLYProperty *nextProperty = nil;
-        for( nextProperty in _properties ) {
-            if( [nextProperty isList] ) {
-                [glTypes addObject:[NSNumber numberWithUnsignedInteger:[nextProperty countGLType]]];
-                [glTypes addObject:[NSNumber numberWithUnsignedInteger:[nextProperty dataGLType]]];
-            } else {
-                [glTypes addObject:[NSNumber numberWithUnsignedInteger:[nextProperty dataGLType]]];
-            }
-        }
-        returnArray = [NSArray arrayWithArray:glTypes];
-    }
-    
-    return returnArray;
-}
-
-- (NSArray *)propertyNames
-{
-    NSArray *returnArray = nil;
-    
-    if( [_properties count] > 0 ) {
-        NSMutableArray *names = [[NSMutableArray alloc] init];
-        PLYProperty *nextProperty = nil;
-        for( nextProperty in _properties ) {
-            [names addObject:[nextProperty name]];
-        }
-        returnArray = [NSArray arrayWithArray:names];
-    }
-    
-    return returnArray;
-}
-
-
 - (void)addPropertyWithString:(NSString *)propertyString
 {
     PLYProperty *newProperty = [[PLYProperty alloc] initWithPropertyString:propertyString];
     
+    [self addProperty:newProperty];
+}
+
+- (void)addProperty:(PLYProperty *)property
+{
     // add a non-nil object to the existing mutable array, or create
     // it if it does not yet exist
-    if(newProperty) {
+    if(property) {
         if( _properties == nil ) {
-            _properties = [NSMutableArray arrayWithObject:newProperty];
+            _properties = [NSMutableArray arrayWithObject:property];
         } else {
-            [_properties addObject:newProperty];
+            [_properties addObject:property];
         }
     }
 }
 
 const NSUInteger kPLYBufferSize = 512;
 
-- (NSUInteger)readFromStrings:(NSArray *)strings startPosition:(NSUInteger)start
+- (NSUInteger)readFromStrings:(NSArray *)strings startIndex:(NSUInteger)start
 {
     __block NSUInteger readLines = 0;
     __block NSUInteger readElements = 0;
