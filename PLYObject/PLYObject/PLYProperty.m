@@ -178,11 +178,14 @@ static NSString *const kPLYPropertyList = @"list";
 
 #pragma mark Data conversion methods
 
-- (NSUInteger)scanPropertyIntoBuffer:(uint8_t *)buffer usingScanner:(NSScanner *)lineScanner {
+static const NSUInteger PLYPropertyMaximumScanBuffer = 16;
+
+- (NSUInteger)scanPropertyIntoData:(NSMutableData *)data usingScanner:(NSScanner *)lineScanner {
     
     NSUInteger totalReadBytes = 0;
+    uint8_t scanBuffer[PLYPropertyMaximumScanBuffer];
     
-    if( buffer == NULL || lineScanner == nil || _propertyType == PLYPropertyTypeInvalid) {
+    if( !data || !lineScanner || _propertyType == PLYPropertyTypeInvalid) {
         return totalReadBytes;
     }
     
@@ -192,39 +195,45 @@ static NSString *const kPLYPropertyList = @"list";
         NSUInteger idx, readBytes;
         double scanDouble;
         NSInteger listCount;
-        uint8_t *bp = buffer;
         
         // scan in the list count
         [lineScanner scanDouble:&scanDouble];
-        readBytes = [self convertFromDouble:scanDouble toType:_countType inBuffer:bp];
-        bp += readBytes;
+        readBytes = [self convertFromDouble:scanDouble toType:_countType inBuffer:scanBuffer];
+
+        [data appendBytes:(void *)scanBuffer length:readBytes];
+        
         totalReadBytes += readBytes;
+        
         listCount = (NSUInteger)scanDouble;
         
         // for each data item that follows, scan it in as a double, and then cast it
         // to the appropriate data type and store it in the buffer
         for( idx=0; idx < listCount; idx++ ) {
             [lineScanner scanDouble:&scanDouble];
-            readBytes = [self convertFromDouble:scanDouble toType:_dataType inBuffer:bp];
-            bp += readBytes;
+            
+            readBytes = [self convertFromDouble:scanDouble toType:_dataType inBuffer:scanBuffer];
+            
+            [data appendBytes:(void *)scanBuffer length:readBytes];
+            
             totalReadBytes += readBytes;
         }
-
+        
     } else if( _propertyType == PLYPropertyTypeScalar ) {
         
         double scanDouble;
-            
+        
         // scan in the value as a double, and then cast it to the appropriate type and
         // add it to the memory buffer.
         [lineScanner scanDouble:&scanDouble];
-            
-        totalReadBytes = [self convertFromDouble:scanDouble toType:_dataType inBuffer:buffer];
-            
+        
+        totalReadBytes = [self convertFromDouble:scanDouble toType:_dataType inBuffer:scanBuffer];
+
+        [data appendBytes:(void *)scanBuffer length:totalReadBytes];
+        
     }
     
     return totalReadBytes;
 }
-
 
 /**
  Converts the supplied double value to the correct property type (specified by the ivar 'type')

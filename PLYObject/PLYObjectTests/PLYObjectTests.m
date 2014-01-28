@@ -263,4 +263,42 @@ static NSString *const kTVPropertyNames = @"propertyNames";
     }
 }
 
+static NSString *const kTVAddElementName = @"element";
+static NSString *const kTVAddElementCount = @"count";
+static NSString *const kTVAddElementString = @"elementString";
+
+- (void) testAddElement
+{
+    NSArray *testElementArray = @[ @{ kTVAddElementName: @"element1",
+                                      kTVAddElementCount: @9999,
+                                      kTVAddElementString: @"element element1 9999" },
+                                   @{ kTVAddElementName: @"a",
+                                      kTVAddElementCount: @99999999999,
+                                      kTVAddElementString: @"element a 99999999999" },
+                                   @{ kTVAddElementName: @"thisIsAnElementName",
+                                      kTVAddElementCount: @1,
+                                      kTVAddElementString: @"element thisIsAnElementName 1" },
+                                   @{ kTVAddElementName: @"an_element_name",
+                                      kTVAddElementCount: @NSUIntegerMax,
+                                      kTVAddElementString: [NSString stringWithFormat:@"element an_element_name %ld",
+                                                            NSUIntegerMax] }
+                                   ];
+
+    PLYObject *testObject = [[PLYObject alloc] init];
+    NSDictionary *aTestVector = nil;
+    
+    for( aTestVector in testElementArray ) {
+        
+        NSString *name = [aTestVector objectForKey:kTVAddElementName];
+        NSNumber *count = [aTestVector objectForKey:kTVAddElementCount];
+        NSString *trueElementString = [aTestVector objectForKey:kTVAddElementString];
+        
+        PLYElement *testElement = [testObject addElement:name count:[count unsignedIntegerValue]];
+        
+        XCTAssertEqualObjects(trueElementString, [testElement elementString],
+                              @"Failed to create proper element string");
+    }
+    
+}
+
 @end

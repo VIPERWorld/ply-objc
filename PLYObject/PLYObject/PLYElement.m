@@ -2,7 +2,6 @@
 //  PLYElement.m
 //  PLYObject
 //
-//  Created by David Brown on 1/19/14.
 //  Copyright (c) 2014 David T. Brown. All rights reserved.
 //
 
@@ -134,8 +133,6 @@ static NSString *const kPLYElementName = @"element";
     }
 }
 
-const NSUInteger kPLYBufferSize = 512;
-
 - (NSUInteger)readFromStrings:(NSArray *)strings startIndex:(NSUInteger)start
 {
     __block NSUInteger readLines = 0;
@@ -148,7 +145,6 @@ const NSUInteger kPLYBufferSize = 512;
     }
     
     NSIndexSet *elementSet = [NSIndexSet indexSetWithIndexesInRange:NSMakeRange(start, stringsToEnd)];
-    uint8_t *lineBuffer = calloc(kPLYBufferSize, sizeof(uint8_t));
 
     __block NSMutableData *elementData = [[NSMutableData alloc] init];
 
@@ -161,19 +157,13 @@ const NSUInteger kPLYBufferSize = 512;
                                     NSScanner *lineScanner = [NSScanner scannerWithString:(NSString *)obj];
                                     
                                     PLYProperty *nextProperty;
-                                    NSUInteger bytes, totalBytes;
+                                    NSUInteger totalBytes;
                                     
-                                    uint8_t *buffer = lineBuffer;
                                     totalBytes = 0;
                                     
                                     for( nextProperty in _properties ) {
-                                        bytes = [nextProperty scanPropertyIntoBuffer:(uint8_t *)buffer
-                                                                        usingScanner:lineScanner];
-                                        buffer += bytes;
-                                        totalBytes += bytes;
+                                        totalBytes += [nextProperty scanPropertyIntoData:elementData usingScanner:lineScanner];
                                     }
-                                    
-                                    [elementData appendBytes:lineBuffer length:totalBytes];
                                     
                                     readElements += (totalBytes > 0) ? 1 : 0; // gratuitous ternary action
 
@@ -188,8 +178,6 @@ const NSUInteger kPLYBufferSize = 512;
                             }];
     
     _data = [NSData dataWithData:elementData];
-    
-    free(lineBuffer);
     
     return readLines;
 }

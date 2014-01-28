@@ -2,7 +2,6 @@
 //  PLYElement.h
 //  PLYObject
 //
-//  Created by David Brown on 1/19/14.
 //  Copyright (c) 2014 David T. Brown. All rights reserved.
 //
 

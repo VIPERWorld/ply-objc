@@ -9,15 +9,14 @@
 #import "PLYElement.h"
 #import "PLYProperty.h"
 
-NSString *const kPLYPlyKeyword = @"ply";
-NSString *const kPLYEndHeaderKeyword = @"end_header";
-NSString *const kPLYCommentKeyword = @"comment";
-NSString *const kPLYElementKeyword = @"element";
-NSString *const kPLYPropertyKeyword = @"property";
-NSString *const kPLYFormatKeyword = @"format";
+static NSString *const kPLYPlyKeyword = @"ply";
+static NSString *const kPLYEndHeaderKeyword = @"end_header";
+static NSString *const kPLYCommentKeyword = @"comment";
+static NSString *const kPLYElementKeyword = @"element";
+static NSString *const kPLYPropertyKeyword = @"property";
+static NSString *const kPLYFormatKeyword = @"format";
 
-const NSUInteger kPLYKeywordIndex = 0;
-
+static const NSUInteger kPLYKeywordIndex = 0;
 
 @implementation PLYObject
 {
@@ -197,7 +196,6 @@ const NSUInteger kPLYKeywordIndex = 0;
     return NO;
 }
 
-
 #pragma mark Incremental addition methods
 
 - (void)addComment:(NSString *)commentString
@@ -211,24 +209,25 @@ const NSUInteger kPLYKeywordIndex = 0;
 
 - (PLYElement *)addElement:(NSString *)name count:(NSUInteger)count
 {
-    return nil;
+    PLYElement *newElement = [[PLYElement alloc] init];
+
+    newElement.name = name;
+    newElement.count = count;
+    
+    return newElement;
 }
 
 - (PLYElement *)getElementWithName:(NSString *)name
 {
     PLYElement *nextElement = nil;
-    PLYElement *returnElement = nil;
     
     for(nextElement in _elements) {
         if( [nextElement.name isEqualToString:name] ) {
-            returnElement = nextElement;
-            break;
+            return nextElement;
         }
     }
     
-    return returnElement;
+    return nil;
 }
-
-
 
 @end

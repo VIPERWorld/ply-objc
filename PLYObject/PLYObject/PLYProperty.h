@@ -55,11 +55,10 @@ typedef NS_ENUM(NSUInteger, PLYDataType) {
 
 /**
  Scans the property using the provided scanner into a provided data buffer
- @param buffer the buffer to load the data into
+ @param data the mutable data buffer to load the scanned data into
  @param lineScanner the scanner to use to get the data
  @return the number of bytes read by the scan operation
  */
-- (NSUInteger)scanPropertyIntoBuffer:(uint8_t *)buffer usingScanner:(NSScanner *)lineScanner;
-
+- (NSUInteger)scanPropertyIntoData:(NSMutableData *)data usingScanner:(NSScanner *)lineScanner;
 
 @end
